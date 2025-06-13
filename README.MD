@@ -6,24 +6,6 @@
 
 
 
-## 仓库地址
-
-```
-Rocky-Linux-Shell
-
-https://gitee.com/funet8/rocky-linux-shell.git
-
-https://github.com/funet8/Rocky-Linux-Shell.git
-
-把文件同时push到多个仓库。
-git@gitee.com:funet8/rocky-linux-shell.git
-git@github.com:funet8/Rocky-Linux-Shell.git
-
-
-```
-
-
-
 ## 为什么选择Rocky Linux 
 
 CentOS 7 过保后换什么操作系统的问题？
@@ -39,6 +21,46 @@ Ubuntu 作为桌面端还是不错的，但作为服务端操作系统还是拉�
 Rocky Linux还是作为服务器系统来替代CentOS 7。
 
 Rocky Linux 的创始人 Greg Kurtzer 就是 CentOS 的创始人之一，因此，Rocky Linux 保留了很多 CentOS 的设计理念和目标，继续为用户提供一个稳定的、长期支持的企业级操作系统。 这也是使用Rocky Linux 来替代CentOS 7的一个重要的原因。
+
+
+
+
+
+
+
+## 仓库地址
+
+把文件同时push到多个仓库
+
+```
+
+https://gitee.com/funet8/rocky-linux-shell.git
+https://github.com/funet8/Rocky-Linux-Shell.git
+
+把文件同时push到多个仓库。
+git@gitee.com:funet8/rocky-linux-shell.git
+git@github.com:funet8/Rocky-Linux-Shell.git
+
+```
+
+
+
+```
+Administrator@chuanqu-star MINGW64 /e/360data/重要数据/桌面
+$ mkdir rocky-linux-shell
+
+Administrator@chuanqu-star MINGW64 /e/360data/重要数据/桌面
+$ cd rocky-linux-shell/
+
+Administrator@chuanqu-star MINGW64 /e/360data/重要数据/桌面/rocky-linux-shell
+$ git remote add multi git@gitee.com:funet8/rocky-linux-shell.git
+$ git remote set-url --add multi git@github.com:funet8/Rocky-Linux-Shell.git
+
+
+
+```
+
+
 
 
 
