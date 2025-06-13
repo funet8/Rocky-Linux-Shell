@@ -32,24 +32,38 @@ Rocky Linux 的创始人 Greg Kurtzer 就是 CentOS 的创始人之一，因此�
 
 把文件同时push到多个仓库
 
-```
-
 https://gitee.com/funet8/rocky-linux-shell.git
 https://github.com/funet8/Rocky-Linux-Shell.git
 
-把文件同时push到多个仓库。
-git@gitee.com:funet8/rocky-linux-shell.git
-git@github.com:funet8/Rocky-Linux-Shell.git
-
-```
-
 
 
 ```
+首先克隆 
+git clone git@github.com:funet8/Rocky-Linux-Shell.git
 
-
+# 添加远程仓库（如果尚未添加）
+git remote add gitee git@gitee.com:funet8/Rocky-Linux-Shell.git
+git remote add github git@github.com:funet8/Rocky-Linux-Shell.git
+# 查看当前远程仓库
+git remote -v
 
 ```
+
+更新到多个仓库
+
+```
+# 添加并提交更改
+git add .
+git commit -m "自动更新文件"
+
+# 推送至所有远程仓库
+git push github main  	# 推送到 GitHub
+git push gitee master   # 推送到 Gitee
+
+echo "文件已成功更新到所有仓库"
+```
+
+可以查看update-repos.sh文件
 
 
 
