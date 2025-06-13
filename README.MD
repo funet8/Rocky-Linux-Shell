@@ -46,15 +46,6 @@ git@github.com:funet8/Rocky-Linux-Shell.git
 
 
 ```
-Administrator@chuanqu-star MINGW64 /e/360data/重要数据/桌面
-$ mkdir rocky-linux-shell
-
-Administrator@chuanqu-star MINGW64 /e/360data/重要数据/桌面
-$ cd rocky-linux-shell/
-
-Administrator@chuanqu-star MINGW64 /e/360data/重要数据/桌面/rocky-linux-shell
-$ git remote add multi git@gitee.com:funet8/rocky-linux-shell.git
-$ git remote set-url --add multi git@github.com:funet8/Rocky-Linux-Shell.git
 
 
 
