@@ -9,9 +9,11 @@ git remote -v
 
 # 添加并提交更改
 git add .
-git commit -m "更新文件"
+git commit -m "自动更新文件"
 
 # 推送至所有远程仓库
-git push --all
+
+git push gitee master   # 推送到 Gitee
+git push github main  # 推送到 GitHub
 
 echo "文件已成功更新到所有仓库"
