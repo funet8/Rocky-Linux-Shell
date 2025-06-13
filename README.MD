@@ -4,8 +4,6 @@
 
 基于 Rocky Linux 9系统的一些实用Shell脚本
 
-
-
 ## 为什么选择Rocky Linux 
 
 CentOS 7 过保后换什么操作系统的问题？
@@ -23,6 +21,8 @@ Rocky Linux还是作为服务器系统来替代CentOS 7。
 Rocky Linux 的创始人 Greg Kurtzer 就是 CentOS 的创始人之一，因此，Rocky Linux 保留了很多 CentOS 的设计理念和目标，继续为用户提供一个稳定的、长期支持的企业级操作系统。 这也是使用Rocky Linux 来替代CentOS 7的一个重要的原因。
 
 
+
+## 系统初始化
 
 
 
