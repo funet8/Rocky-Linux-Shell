@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 添加远程仓库（如果尚未添加）
-git remote add gitee git@gitee.com:funet8/Rocky-Linux-Shell.git
-git remote add github git@github.com:funet8/Rocky-Linux-Shell.git
+# git remote add gitee git@gitee.com:funet8/Rocky-Linux-Shell.git
+# git remote add github git@github.com:funet8/Rocky-Linux-Shell.git
 
 # 查看当前远程仓库
 git remote -v

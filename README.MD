@@ -28,27 +28,35 @@ Rocky Linux 的创始人 Greg Kurtzer 就是 CentOS 的创始人之一，因此�
 
 
 
-## 仓库地址
 
-把文件同时push到多个仓库
+
+
+
+## 把文件同时push到多个仓库
 
 https://gitee.com/funet8/rocky-linux-shell.git
 
 https://github.com/funet8/Rocky-Linux-Shell.git
 
+注意
 
+- 两个仓库都需要配置 SSH 公钥授权。
+- 推荐使用 SSH 地址，避免每次输入密码。
+- 如果你担心同步出错，建议先 push 到主仓库，再 push 到镜像仓库。
 
 ```
 首先克隆 
 git clone git@github.com:funet8/Rocky-Linux-Shell.git
 
-# 添加远程仓库（如果尚未添加）
+# 添加远程仓库（如果尚未添加，添加一次即可）
 git remote add gitee git@gitee.com:funet8/Rocky-Linux-Shell.git
 git remote add github git@github.com:funet8/Rocky-Linux-Shell.git
 # 查看当前远程仓库
 git remote -v
 
 ```
+
+
 
 更新到多个仓库
 

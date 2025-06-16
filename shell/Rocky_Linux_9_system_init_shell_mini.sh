@@ -18,6 +18,7 @@
 # -------------------------------------------------------------------------------
 
 HOSTNAME="node2"
+
 SSH_PROT="60920"
 
 # 定义公钥内容
@@ -31,15 +32,8 @@ NC='\033[0m' # 无颜色
 
 
 # 日志文件
-LOG_FILE="/var/log/Rocky_Linux_9_system_init_$(date +%Y%m%d_%H%M%S).log"
+LOG_FILE="/root/Rocky_Linux_9_system_init_$(date +%Y%m%d_%H%M%S).log"
 
-# 检查是否以root权限运行
-check_root() {
-    if [ "$(id -u)" != "0" ]; then
-        echo -e "${RED}错误：此脚本需要root权限运行${NC}"
-        exit 1
-    fi
-}
 # 检查系统是否是Rocky Linux 9
 check_os(){
 	# 获取当前系统版本
@@ -55,8 +49,19 @@ check_os(){
 	fi
 }
 
+# 检查是否以root权限运行
+check_root() {
+    if [ "$(id -u)" != "0" ]; then
+        echo -e "${RED}错误：此脚本需要root权限运行${NC}"
+        exit 1
+    fi
+}
+
+
 # 修改主机名
-hostnamectl set-hostname ${HOSTNAME}
+set_hostname() {
+	hostnamectl set-hostname ${HOSTNAME}
+}
 
 # 记录日志函数
 log() {
@@ -127,21 +132,29 @@ update_system() {
 }
 
 
-# 禁止root密码登录，导入密钥
-root_auth(){
-    sed -i 's/^#PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
-    # 创建 root 用户的公钥目录（如果不存在）
-    mkdir -p /root/.ssh
-    # 将公钥写入 authorized_keys 文件
-    echo "$PUB_KEY" >> /root/.ssh/authorized_keys
-    chmod 600 /root/.ssh/authorized_keys
-    chmod 700 /root/.ssh
-    # 重启 SSH 服务以应用更改
-    systemctl restart sshd
-    log "配置完成：root 用户只能使用秘钥登录，禁用了密码登录。"
+# 修改SSH端口
+config_ssh(){
+
+	SSHD_CONFIG="/etc/ssh/sshd_config"
+
+	echo "修改 sshd_config 文件..."
+	if grep -q "^#Port 22" "$SSHD_CONFIG"; then
+		sed -i "s/^#Port 22/Port ${SSH_PROT}/" "$SSHD_CONFIG"
+	elif grep -q "^Port " "$SSHD_CONFIG"; then
+		sed -i "s/^Port .*/Port ${SSH_PROT}/" "$SSHD_CONFIG"
+	else
+		echo "Port ${SSH_PROT}" >> "$SSHD_CONFIG"
+	fi
+
+	echo "添加防火墙端口规则..."
+	firewall-cmd --permanent --add-port=${SSH_PROT}/tcp
+	firewall-cmd --reload
+
+	echo "重启 sshd 服务..."
+	systemctl restart sshd
+
+	log "SSH 端口已修改为 ${SSH_PROT}"
 }
-
-
 
 # 配置防火墙
 configure_firewall() {
@@ -184,26 +197,18 @@ configure_ssh() {
     sed -i 's/#MaxAuthTries 6/MaxAuthTries 3/g' /etc/ssh/sshd_config
     sed -i 's/#LoginGraceTime 2m/LoginGraceTime 60/g' /etc/ssh/sshd_config
     
-    # 检查是否存在SSH密钥
-    if [ ! -d "/root/.ssh" ]; then
-        mkdir -p /root/.ssh
-        chmod 700 /root/.ssh
-    fi
-    
-    if [ ! -f "/root/.ssh/authorized_keys" ]; then
-        touch /root/.ssh/authorized_keys
-        chmod 600 /root/.ssh/authorized_keys
-        log "WARNING" "SSH密钥认证已启用，但未找到授权密钥"
-        log "WARNING" "请手动添加SSH公钥到 /root/.ssh/authorized_keys"
-    fi
-    
-    # 重启SSH服务
+	mkdir -p /root/.ssh
+    # 将公钥写入 authorized_keys 文件
+    echo "$PUB_KEY" >> /root/.ssh/authorized_keys
+	
+    chmod 600 /root/.ssh/authorized_keys
+    chmod 700 /root/.ssh
+	
+    # 重启 SSH 服务以应用更改
     systemctl restart sshd
-    
+	
     log "INFO" "SSH安全配置完成"
     log "INFO" "已禁用root直接登录和密码认证"
-    
-    return 0
 }
 
 # 配置SELinux
@@ -734,8 +739,9 @@ show_completion() {
 
 # 主函数
 main() {
-    check_root
 	check_os
+    check_root
+	set_hostname
     init_log
     show_welcome
     
@@ -743,6 +749,7 @@ main() {
     
     # 按顺序执行各个安全加固步骤
     update_system
+	config_ssh
     configure_firewall
     configure_ssh
     configure_selinux
