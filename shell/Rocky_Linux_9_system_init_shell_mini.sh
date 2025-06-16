@@ -9,13 +9,36 @@
 # Rocky Linux 9 系统初始化与安全加固脚本
 # 适用于生产环境服务器基础安全配置
 # 注意：执行前请备份重要数据，部分配置可能影响系统功能
-# 先修改 主机名： HOSTNAME 、 SSH的端口等变量 
+# 先修改 主机名： HOSTNAME 、 SSH的端口等变量
 # -------------------------------------------------------------------------------
 # 注意事项:
 # 先ping百度域名，看能否解析域名、修改主机名和ssh端口
 # 主要功能:
-#	1.修改主机名
+#	1.修改主机名 ： set_hostname
+#   2.安装基础软件包 ： install_base_software
+#   3.更新系统 ： update_system
+#   4.修改SSH端口 ： config_ssh
+#   5.配置防火墙 ： configure_firewall
+#   6.配置SSH安全 ： configure_ssh
+#   7.配置SELinux ： configure_selinux
+#   8.配置系统日志 ： configure_logging
+#   9.配置账户安全 ： configure_accounts
+#   10.配置系统资源限制 ： configure_resource_limits
+#   11.配置网络安全 ： configure_network_security
+#   12.配置Cron和at服务 ： configure_cron
+#   13.自动配置 chronyd 同步时间 ： configure_time
+#   14.配置系统审计 ： configure_audit
+#   15.安装安全工具 ： install_security_tools
+#   16.配置定时任务 ： configure_scheduled_tasks(未开启)
+#   17.显示完成信息 ： show_completion
+#   18.记录日志 ：log
+#   19.初始化日志 ： init_log
+#   20.显示欢迎信息 ：show_welcome
+#   21.检查操作系统版本 ：check_os
+#   22.检查是否以root权限运行 ：check_root
+#   23.脚本执行日志记录到文件 ：LOG_FILE
 # -------------------------------------------------------------------------------
+
 # 使用：
 # wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
 # sh Rocky_Linux_9_system_init_shell_mini.sh
@@ -70,7 +93,7 @@ set_hostname() {
 }
 
 # 安装基础软件包
-install_base(){
+install_base_software(){
     dnf install -y vim wget curl lrzsz net-tools lsof bash-completion yum-utils tar zip unzip sudo cronie chrony policycoreutils-python-utils
 
     
@@ -732,10 +755,10 @@ EOF
     fi
     
     # 添加每周系统更新任务
-    if ! crontab -l | grep -q "dnf update"; then
-        (crontab -l 2>/dev/null; echo "0 2 * * 0 dnf -y update && dnf -y autoremove") | crontab -
-        log "INFO" "已添加每周系统更新任务"
-    fi
+    #if ! crontab -l | grep -q "dnf update"; then
+    #    (crontab -l 2>/dev/null; echo "0 2 * * 0 dnf -y update && dnf -y autoremove") | crontab -
+    #    log "INFO" "已添加每周系统更新任务"
+    #fi
     
     # 添加每周AIDE数据库更新任务
     if [ -f "/usr/sbin/aide" ] && ! crontab -l | grep -q "aide --update"; then
@@ -784,7 +807,7 @@ main() {
 	check_os
     check_root
 	set_hostname
-    install_base
+    install_base_software
     init_log
     show_welcome
     
@@ -804,7 +827,7 @@ main() {
 	configure_time
     configure_audit
     install_security_tools
-    configure_scheduled_tasks
+    # configure_scheduled_tasks
     
     show_completion
     
