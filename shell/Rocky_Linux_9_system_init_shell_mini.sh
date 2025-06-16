@@ -11,16 +11,22 @@
 # 注意：执行前请备份重要数据，部分配置可能影响系统功能
 # 先修改 主机名： HOSTNAME 、 SSH的端口等变量 
 # -------------------------------------------------------------------------------
-# 注意事项:    
+# 注意事项:
 # 先ping百度域名，看能否解析域名、修改主机名和ssh端口
 # 主要功能:
 #	1.修改主机名
 # -------------------------------------------------------------------------------
+# 使用：
+# wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
+# sh Rocky_Linux_9_system_init_shell_mini.sh
+# github:
+# wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
+# sh Rocky_Linux_9_system_init_shell_mini.sh
+# -------------------------------------------------------------------------------
 
+# 修改自定义内容
 HOSTNAME="node2"
-
 SSH_PROT="60920"
-
 # 定义公钥内容
 PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP4yncDcWDllSoZfVoC8D8bh+tmvLtTBcNHJGkqnGoZRfoMZmCM3HX6QlP43U8xfObXjX3GmsrBKfcfEXT//XZVkp1XKa0omC8UkqKHokufBmzan2EMe1PC31w4UpOK+ZiRb2j70YgSUuV1IqasA0Z38H0zOeMuPnNP1Y8ZX8tD2UfhtX+TuD1T1wHdgRhAdhSr15APR059yRqQeDjIlVB+044JCx2yO/GUx3zoZUuPJrRl3FNbLnrsMTw6IVzuV68WxnHUsfkclrUlCYHwW5f8qpY0aWQBfON0ptJJBmLAmzdhvJkEGX5VZRTXlCO8m/aSR2+EEQvgWsyOJ4PrCMT root@shanghai-node02"
 
@@ -61,6 +67,19 @@ check_root() {
 # 修改主机名
 set_hostname() {
 	hostnamectl set-hostname ${HOSTNAME}
+}
+
+# 安装基础软件包
+install_base(){
+    dnf install -y vim wget curl lrzsz net-tools lsof bash-completion yum-utils tar zip unzip sudo cronie chrony policycoreutils-python-utils
+
+    
+    # 安装 EPEL 仓库
+    dnf install -y epel-release
+    dnf makecache
+
+    # rc.local添加执行权限   
+    chmod +x /etc/rc.d/rc.local
 }
 
 # 记录日志函数
@@ -383,6 +402,9 @@ net.ipv4.tcp_synack_retries = 3
 
 # 禁用IP转发
 net.ipv4.ip_forward = 0
+# 启用IP转发，改为此配置，并且执行生效： sysctl -p
+# net.ipv4.ip_forward = 1
+
 
 # 禁用IPv6
 net.ipv6.conf.all.disable_ipv6 = 1
@@ -445,6 +467,23 @@ configure_cron() {
     log "INFO" "计划任务服务配置完成"
     
     return 0
+}
+
+# 自动配置 chronyd 同步时间
+configure_time(){
+	dnf install -y chrony
+
+	sed -i 's/^server/#server/g' /etc/chrony.conf
+	echo "server ntp.aliyun.com iburst" >> /etc/chrony.conf
+	echo "server 0.centos.pool.ntp.org iburst" >> /etc/chrony.conf
+	echo "server 1.centos.pool.ntp.org iburst" >> /etc/chrony.conf
+	echo "server 2.centos.pool.ntp.org iburst" >> /etc/chrony.conf
+	echo "server 3.centos.pool.ntp.org iburst" >> /etc/chrony.conf
+
+	systemctl restart chronyd
+	systemctl enable chronyd
+
+	log "INFO" "chronyd 同步时间完成"
 }
 
 # 配置系统审计
@@ -548,6 +587,9 @@ install_security_tools() {
     log "INFO" "安装安全工具..."
     
     # 安装基础安全工具
+    # 如果报错：Error: Unable to find a match: lynis rkhunter fail2ban
+    # dnf install -y epel-release
+
     dnf -y install aide lynis rkhunter fail2ban nmap sysstat lsof bind-utils
 
     # 初始化AIDE
@@ -742,6 +784,7 @@ main() {
 	check_os
     check_root
 	set_hostname
+    install_base
     init_log
     show_welcome
     
@@ -758,6 +801,7 @@ main() {
     configure_resource_limits
     configure_network_security
     configure_cron
+	configure_time
     configure_audit
     install_security_tools
     configure_scheduled_tasks
