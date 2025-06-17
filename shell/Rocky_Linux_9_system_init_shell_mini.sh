@@ -7,6 +7,7 @@
 # Description: Rocky_Linux_9系统新安装后的初始设置
 
 # 使用：
+# gitee:
 # wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
 # sh Rocky_Linux_9_system_init_shell_mini.sh
 # github:

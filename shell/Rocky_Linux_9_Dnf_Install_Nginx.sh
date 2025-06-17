@@ -7,6 +7,7 @@
 # Description: Rocky_Linux_9系统新安装后的初始设置
 
 # 使用：
+# gitee:
 # wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_Dnf_Install_Nginx.sh
 # sh Rocky_Linux_9_Dnf_Install_Nginx.sh
 # github:
@@ -60,9 +61,10 @@ echo "nginx.conf move success"
 cd /data/conf/sites-available/
 wget https://gitee.com/funet8/centos6_LANP_dockerfile/raw/master/centos7_nginx_apache/nginx_main.conf
 
-#添加www组和www用户####################################################################
-groupadd www
-useradd -g www www
+# 删除默认站点
+rm -rf /usr/share/nginx/html/*
+echo 'index page' > /usr/share/nginx/html/index.html
+chown www.www -R /usr/share/nginx/html/
 
 #设置目录权限##########################################################################
 chown -R www:www /data/wwwroot/web

@@ -9,6 +9,7 @@
 
 # -------------------------------------------------------------------------------
 # 使用：
+# gitee:
 # wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/create_dirs.sh
 # sh create_dirs.sh
 
