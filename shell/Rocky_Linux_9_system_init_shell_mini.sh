@@ -13,6 +13,16 @@
 # -------------------------------------------------------------------------------
 # 注意事项:
 # 先ping百度域名，看能否解析域名、修改主机名和ssh端口
+# -------------------------------------------------------------------------------
+
+# 使用：
+# wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
+# sh Rocky_Linux_9_system_init_shell_mini.sh
+# github:
+# wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
+# sh Rocky_Linux_9_system_init_shell_mini.sh
+# -------------------------------------------------------------------------------
+
 # 主要功能:
 #	1.修改主机名 ： set_hostname
 #   2.安装基础软件包 ： install_base_software
@@ -39,13 +49,6 @@
 #   23.脚本执行日志记录到文件 ：LOG_FILE
 # -------------------------------------------------------------------------------
 
-# 使用：
-# wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
-# sh Rocky_Linux_9_system_init_shell_mini.sh
-# github:
-# wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
-# sh Rocky_Linux_9_system_init_shell_mini.sh
-# -------------------------------------------------------------------------------
 
 # 修改自定义内容
 HOSTNAME="node2"
@@ -195,7 +198,7 @@ config_ssh(){
 	echo "重启 sshd 服务..."
 	systemctl restart sshd
 
-	log "SSH 端口已修改为 ${SSH_PROT}"
+	log "INFO" "SSH 端口已修改为 ${SSH_PROT}"
 }
 
 # 配置防火墙
