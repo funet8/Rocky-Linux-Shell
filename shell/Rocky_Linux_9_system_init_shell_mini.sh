@@ -6,6 +6,15 @@
 # Email:       star@xgss.net
 # Description: Rocky_Linux_9系统新安装后的初始设置
 
+# 使用：
+# wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
+# sh Rocky_Linux_9_system_init_shell_mini.sh
+# github:
+# wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
+# sh Rocky_Linux_9_system_init_shell_mini.sh
+# -------------------------------------------------------------------------------
+
+
 # Rocky Linux 9 系统初始化与安全加固脚本
 # 适用于生产环境服务器基础安全配置
 # 注意：执行前请备份重要数据，部分配置可能影响系统功能
@@ -15,13 +24,6 @@
 # 先ping百度域名，看能否解析域名、修改主机名和ssh端口
 # -------------------------------------------------------------------------------
 
-# 使用：
-# wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
-# sh Rocky_Linux_9_system_init_shell_mini.sh
-# github:
-# wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_system_init_shell_mini.sh
-# sh Rocky_Linux_9_system_init_shell_mini.sh
-# -------------------------------------------------------------------------------
 
 # 主要功能:
 #	1.修改主机名 ： set_hostname

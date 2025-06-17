@@ -7,8 +7,6 @@
 # Email:       star@xgss.net
 # Description: 创建常用的目录
 
-# Rocky Linux 9 系统初始化与安全加固脚本
-
 # -------------------------------------------------------------------------------
 # 使用：
 # wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/create_dirs.sh
