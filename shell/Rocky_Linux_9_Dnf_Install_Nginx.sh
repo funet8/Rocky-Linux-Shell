@@ -53,18 +53,22 @@ firewall-cmd --reload
 cp -p /etc/nginx/nginx.conf  /etc/nginx/nginx.conf.bak
 rm -rf /etc/nginx/nginx.conf
 cd /data/conf/
-wget https://gitee.com/funet8/centos6_LANP_dockerfile/raw/master/centos7_nginx_apache/nginx.conf
+wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/nginx.conf
 ln -s /data/conf/nginx.conf /etc/nginx/
 echo "nginx.conf move success"
 
 #站点配置
 cd /data/conf/sites-available/
-wget https://gitee.com/funet8/centos6_LANP_dockerfile/raw/master/centos7_nginx_apache/nginx_main.conf
+wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/nginx_main.conf
 
 # 删除默认站点
 rm -rf /usr/share/nginx/html/*
 echo 'index page' > /usr/share/nginx/html/index.html
 chown www.www -R /usr/share/nginx/html/
+
+#添加www组和www用户####################################################################
+groupadd www
+useradd -g www www
 
 #设置目录权限##########################################################################
 chown -R www:www /data/wwwroot/web
@@ -81,9 +85,9 @@ echo "请访问 http://<你的服务器IP> 验证 Nginx 是否运行。"
 
 ###切割日志
 cd /data/conf/shell/
-wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/cut_web_log.sh
-chmod +x /data/conf/shell/cut_web_log.sh
-echo "00 00 * * * root /data/conf/shell/cut_web_log.sh" >> /etc/crontab
+wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/nginx_cut_web_log.sh
+chmod +x /data/conf/shell/nginx_cut_web_log.sh
+echo "00 00 * * * root /data/conf/shell/nginx_cut_web_log.sh" >> /etc/crontab
 systemctl restart crond
 
 
