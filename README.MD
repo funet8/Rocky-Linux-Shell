@@ -30,7 +30,9 @@ Rocky Linux 的创始人 Greg Kurtzer 就是 CentOS 的创始人之一，因此�
 
 
 
-## 把文件同时push到多个仓库
+
+
+# 把文件同时push到多个仓库
 
 https://gitee.com/funet8/rocky-linux-shell.git
 

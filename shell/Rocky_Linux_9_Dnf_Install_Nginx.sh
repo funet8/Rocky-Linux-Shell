@@ -61,11 +61,6 @@ echo "nginx.conf move success"
 cd /data/conf/sites-available/
 wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/nginx_main.conf
 
-# 删除默认站点
-rm -rf /usr/share/nginx/html/*
-echo 'index page' > /usr/share/nginx/html/index.html
-chown www.www -R /usr/share/nginx/html/
-
 #添加www组和www用户####################################################################
 groupadd www
 useradd -g www www
@@ -73,7 +68,13 @@ useradd -g www www
 #设置目录权限##########################################################################
 chown -R www:www /data/wwwroot/web
 chown -R www:www /data/conf/sites-available/
+# 权限问题会报错 403
+chmod 755 -R /data/
 
+# 删除默认站点
+rm -rf /usr/share/nginx/html/*
+echo 'index page' > /usr/share/nginx/html/index.html
+chown www.www -R /usr/share/nginx/html/
 
 # 检查是否启动成功
 systemctl restart nginx

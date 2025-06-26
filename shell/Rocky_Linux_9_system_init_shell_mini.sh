@@ -342,6 +342,8 @@ configure_accounts() {
     sed -i 's/password    requisite     pam_pwquality.so/password    requisite     pam_pwquality.so minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/g' /etc/pam.d/system-auth
     
     # 设置密码过期策略
+	#UMASK                    077	生成的文件权限是600（666-077）
+	#UMASK                    022	生成的文件权限是644
     cat > /etc/login.defs << "EOF"
 # 密码过期设置
 PASS_MAX_DAYS   90
@@ -354,7 +356,7 @@ UID_MAX                 60000
 GID_MIN                  1000
 GID_MAX                 60000
 CREATE_HOME             yes
-UMASK                    077
+UMASK                    022
 ENCRYPT_METHOD           SHA512
 EOF
 
