@@ -804,8 +804,8 @@ show_completion() {
     
     read -p "是否需要重启系统? (y/n): " choice
     if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-        log "INFO" "系统将在30秒后重启，请保存未完成的工作"
-        sleep 30
+        log "INFO" "系统将在3秒后重启！"
+        sleep 3
         reboot
     fi
 }

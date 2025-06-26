@@ -49,6 +49,7 @@ firewall-cmd --permanent --add-service=https
 firewall-cmd --reload
 
 #配置文件目录设置######################################################################
+wget -q -O - https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/create_dirs.sh | bash -sh
 #移动nginx配置文件
 cp -p /etc/nginx/nginx.conf  /etc/nginx/nginx.conf.bak
 rm -rf /etc/nginx/nginx.conf
