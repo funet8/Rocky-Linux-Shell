@@ -46,6 +46,8 @@ systemctl enable nginx
 # 配置防火墙允许 HTTP 和 HTTPS
 firewall-cmd --permanent --add-service=http
 firewall-cmd --permanent --add-service=https
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+firewall-cmd --zone=public --add-port=443/tcp --permanent
 firewall-cmd --reload
 
 #配置文件目录设置######################################################################

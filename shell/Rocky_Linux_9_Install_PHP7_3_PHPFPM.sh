@@ -6,6 +6,17 @@
 # Author:      star
 # Email:       star@xgss.net
 # Description: Rocky Linux 9系统中源码包安装php7.3 phpfpm，shell脚本
+# 安装目录为：/data/app/php7.3 、用户为 www 、端口自定义为 7300 。
+# 安装扩展
+# 需要安装：
+# openssl
+# memcached
+# libmemcached
+# phpredis
+# pcntl
+# amqp
+# rabbitmq
+# swoole
 
 # 使用：
 # gitee:
@@ -18,36 +29,70 @@
 
 ###########################################################
 # 1.下载PHP7.3.3源码包安装
-# 2.安装openssl、memcache、phpredis扩展
+# 2.安装 openssl 、memcache 、phpredis扩展
 # 3.修改配端口7300，时区、PHP进程数等。
 # 4.安装目录 ${PHP_DIR} ，用户 www。
 ###########################################################
 #上传php7.3-software.tar.gz 到 /data/software
 
 
-PHP_DIR=/data/app/php7.3	#php安装路径
-USER=www				#php用户
-PHP_PORT='7300'  		#php-fpm端口
+PHP_DIR=/data/app/php7.3		#php安装路径
+USER=www						#用户
+PHP_PORT='7300'					#php-fpm端口
 
-#检查是否是root用户######################################################################
-if [ $(id -u) != "0" ]; then  
-    echo "Error: You must be root to run this script, please use root to run"  
-    exit 1
+
+# 检查当前用户是否为 root
+if [[ $EUID -ne 0 ]]; then
+   echo "错误: 此脚本必须以 root 用户身份运行。"
+   exit 1
+fi
+
+# 检查操作系统是否为 Rocky Linux 9 (或类似的 RHEL 9 系列)
+if ! grep -q "Rocky Linux 9" /etc/os-release; then
+    echo "警告: 此脚本设计用于 Rocky Linux 9。在其他系统上可能无法正常工作。"
+    read -p "是否继续? (y/N): " choice
+    if [[ ! "$choice" =~ ^[yY]$ ]]; then
+        echo "安装已取消。"
+        exit 1
+    fi
 fi
 
 #新建用户和用户组######################################################################
 groupadd $USER
 useradd -g $USER $USER
 
-#安装依赖包
-dnf groupinstall "Development Tools" -y
-dnf install -y gcc libxml2-devel bzip2-devel libpng-devel libjpeg-devel libmcrypt-devel libxslt-devel libicu-devel libjpeg-turbo-devel libpng-devel libXpm-devel libwebp-devel libicu-devel
-dnf install -y curl curl-devel
-dnf install -y freetype-devel
-dnf install -y  gmp-devel
-dnf install -y  readline-devel
-dnf install -y  libzip-devel
-dnf install -y  cmake gcc make libtool
+# 启用 CodeReady Linux Builder (CRB) 仓库，通常包含更多开发包
+echo "尝试启用 crb (CodeReady Linux Builder) 仓库..."
+dnf config-manager --set-enabled crb
+if [ $? -ne 0 ]; then
+    echo "警告: 启用 crb 仓库失败，某些依赖可能无法找到。尝试继续安装。"
+fi
+
+# 安装编译 PHP 所需的依赖包
+# 注意: mysql-devel 或 mariadb-devel 用于 mysqli 和 pdo_mysql 扩展
+# libzip-devel 用于 zip 扩展
+# oniguruma-devel 用于 mbstring 扩展
+# libicu-devel 用于 intl 扩展
+# libwebp-devel 用于 webp 支持 (GD库)
+# libtirpc-devel: mariadb-devel 的一个常见依赖
+dnf install -y gcc make autoconf libxml2-devel libcurl-devel openssl-devel \
+    libjpeg-turbo-devel libpng-devel freetype-devel mariadb-devel \
+    libzip-devel oniguruma-devel libicu-devel libwebp-devel \
+    bzip2-devel readline-devel sqlite-devel zlib-devel \
+    systemd-devel libtirpc-devel # systemd-devel for systemd integration in FPM
+if [ $? -ne 0 ]; then
+    echo "错误: 依赖包安装失败。请检查您的网络连接或仓库配置。"
+    exit 1
+fi
+echo "依赖包安装完成。"
+echo ""
+
+# 创建安装目录并设置权限
+mkdir -p ${INSTALL_DIR}
+chown -R ${PHP_USER}:${PHP_USER} ${INSTALL_DIR}
+chmod -R 755 ${INSTALL_DIR}
+echo "安装目录 ${INSTALL_DIR} 已创建并设置权限。"
+echo ""
 
 # 安装 libzip ######################################################################
 cd /data/software

@@ -100,7 +100,8 @@ set_hostname() {
 
 # 安装基础软件包
 install_base_software(){
-    dnf install -y vim wget curl lrzsz net-tools lsof bash-completion yum-utils tar zip unzip sudo cronie chrony policycoreutils-python-utils
+    
+	dnf install -y vim wget curl lrzsz net-tools lsof bash-completion yum-utils tar zip unzip sudo cronie chrony policycoreutils-python-utils
 
     
     # 安装 EPEL 仓库
