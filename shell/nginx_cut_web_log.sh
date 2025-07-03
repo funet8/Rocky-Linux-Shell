@@ -23,8 +23,8 @@ function cut_log {
 function restart_web {
 	echo 'restart web service'
 	systemctl reload nginx
-	systemctl reload httpd
-	/etc/init.d/php7.3-fpm reload
+	#systemctl reload httpd
+	#/etc/init.d/php7.3-fpm reload
 }
 
 function vsftp_other {

@@ -53,6 +53,21 @@ if [ "$(id -u)" != "0" ]; then
     error "This script must be run as root"
 fi
 
+# 检查系统是否是Rocky Linux 9
+function check_os(){
+	# 获取当前系统版本
+	os_version=$(cat /etc/os-release)
+
+	# 判断系统是否是 Rocky Linux 9
+	if [[ "$os_version" =~ "Rocky Linux" ]] && [[ "$os_version" =~ "9" ]]; then
+		echo "系统是 Rocky Linux 9，继续执行脚本..."
+		# 在这里添加你脚本的其他内容
+	else
+		echo "当前系统不是 Rocky Linux 9，脚本退出！"
+		exit 1
+	fi
+}
+
 # 创建MySQL用户和组
 function create_mysql_user(){
     if ! id -u ${MYSQL_USER} >/dev/null 2>&1; then
@@ -352,7 +367,15 @@ EOF
 
     echo '# 关闭mysql5.7服务' >> /root/mysql5.7.sh
     echo 'systemctl stop mysql57' >> /root/mysql5.7.sh
-}   
+}
+function mysql_auto_start2(){
+	echo "添加Mysql5.7开机自启动脚本" >> /etc/rc.local
+	echo "nohup ${Mysql_app}/bin/mysqld_safe --defaults-file=${Mysql_etc}/my.cnf --user=${MYSQL_USER} > /dev/null 2>&1 &">> /etc/rc.local
+	#启用rc-local
+	systemctl enable rc-local
+	systemctl start rc-local
+    chmod +x /etc/rc.d/rc.local
+}
 # 添加环境变量
 function add_environment_variable() {
     echo '#mysql5.7' >> /etc/profile
@@ -369,6 +392,8 @@ function open_firewall() {
     echo "Firewall port ${MYSQL_PORT} opened."
 }
 
+check_os
+
 # 创建mysql用户
 create_mysql_user
 #安装依耐包
@@ -381,8 +406,17 @@ Mysql_etc
 mysql_initialize
 
 # 开机自启动mysql服务
-mysql_auto_start
+#mysql_auto_start
+mysql_auto_start2
 # 添加环境变量
 add_environment_variable
 # 开启防火墙
 open_firewall
+
+# 附加：
+# 创建一个名字star账号，密码为 PASs5566a ，管理员权限的账号
+#  /data/app/mysql5.7/install/bin/mysql -u root -h localhost -P61570 -p'CQ1234567'
+# CREATE USER 'star'@'%' IDENTIFIED BY 'PASs5566a';
+# GRANT  all privileges ON * . * TO 'star'@'%' IDENTIFIED BY 'PASs5566a'; 
+# GRANT ALL PRIVILEGES ON * . * TO 'star'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;
+# flush privileges;

@@ -108,7 +108,9 @@ install_base_software(){
     dnf install -y epel-release
     dnf makecache
 
-    # rc.local添加执行权限   
+    # 启用rc-local
+	systemctl enable rc-local
+	systemctl start rc-local
     chmod +x /etc/rc.d/rc.local
 }
 

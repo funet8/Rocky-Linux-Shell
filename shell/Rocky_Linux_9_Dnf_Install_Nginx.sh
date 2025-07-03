@@ -15,6 +15,13 @@
 # sh Rocky_Linux_9_Dnf_Install_Nginx.sh
 # -------------------------------------------------------------------------------
 
+# 主要功能介绍
+# 1.dnf安装nginx
+# 2.firewall-cmd放开 80和443端口
+# 3.nginx配置文件：
+# 主配置文件：/data/conf/nginx.conf
+# 站点配置文件：/data/conf/sites-available/nginx_*
+
 
 # 判断系统是否为 Rocky Linux 9
 
@@ -50,7 +57,7 @@ firewall-cmd --zone=public --add-port=80/tcp --permanent
 firewall-cmd --zone=public --add-port=443/tcp --permanent
 firewall-cmd --reload
 
-#配置文件目录设置######################################################################
+#配置文件目录设置
 wget -q -O - https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/create_dirs.sh | bash -sh
 #移动nginx配置文件
 cp -p /etc/nginx/nginx.conf  /etc/nginx/nginx.conf.bak
@@ -74,7 +81,7 @@ chown -R www:www /data/conf/sites-available/
 # 权限问题会报错 403
 chmod 755 -R /data/
 
-# 删除默认站点
+# 删除默认站点文件
 rm -rf /usr/share/nginx/html/*
 echo 'index page' > /usr/share/nginx/html/index.html
 chown www.www -R /usr/share/nginx/html/
