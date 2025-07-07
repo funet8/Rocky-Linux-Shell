@@ -185,7 +185,10 @@ update_system() {
 
 # 修改SSH端口
 config_ssh(){
-
+	# 确保防火墙服务已启用
+    systemctl enable firewalld
+    systemctl start firewalld
+	
 	SSHD_CONFIG="/etc/ssh/sshd_config"
 
 	echo "修改 sshd_config 文件..."
@@ -198,7 +201,7 @@ config_ssh(){
 	fi
 
 	echo "添加防火墙端口规则..."
-	firewall-cmd --permanent --add-port=${SSH_PROT}/tcp
+	firewall-cmd --zone=public --add-port=${SSH_PROT}/tcp --permanent
 	firewall-cmd --reload
 
 	echo "重启 sshd 服务..."
@@ -210,22 +213,15 @@ config_ssh(){
 # 配置防火墙
 configure_firewall() {
     log "INFO" "配置防火墙..."
-    
-    # 确保防火墙服务已启用
-    systemctl enable firewalld
-    systemctl start firewalld
-
-    
     # 开放必要端口
-    firewall-cmd --permanent --add-service=ssh
-    firewall-cmd --permanent --add-service=http
-    firewall-cmd --permanent --add-service=https
+    firewall-cmd --zone=public --permanent --add-service=http
+    firewall-cmd --zone=public --permanent --add-service=https
     
     # 重新加载防火墙规则
     firewall-cmd --reload
     
     log "INFO" "防火墙配置完成，SSH端口: $ssh_port"
-    log "INFO" "已开放服务: SSH, HTTP, HTTPS"
+    log "INFO" "已开放服务: HTTP, HTTPS"
     
     return 0
 }
@@ -827,7 +823,7 @@ main() {
     # 按顺序执行各个安全加固步骤
     update_system
 	config_ssh
-    configure_firewall
+    #configure_firewall
     configure_ssh
     configure_selinux
     configure_logging

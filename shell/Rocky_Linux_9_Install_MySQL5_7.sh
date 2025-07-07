@@ -13,13 +13,13 @@
 # github:
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_MySQL5_7.sh
 # sh Rocky_Linux_9_Install_MySQL5_7.sh
-# -------------------------------------------------------------------------------
 
 
 # 功能：Rocky Linux 9系统中源码包安装 mysql5.7，shell脚本
 # mysql安装的目录：/data/app/mysql5.7/install
 # mysql数据库目录:/data/app/mysql5.7/data
 # mysql数据库配置目录:/data/app/mysql5.7/etc
+# mysql数据库Binlog配置目录： /data/app/mysql5.7/binlog
 # mysql端口为： 61570
 # mysql root密码为： CQ1234567
 
