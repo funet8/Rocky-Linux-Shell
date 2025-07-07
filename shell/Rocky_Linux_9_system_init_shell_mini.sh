@@ -31,7 +31,7 @@
 #   2.安装基础软件包 ： install_base_software
 #   3.更新系统 ： update_system
 #   4.修改SSH端口 ： config_ssh
-#   5.配置防火墙 ： configure_firewall
+#   5.配置防火墙 ： configure_firewall (取消)
 #   6.配置SSH安全 ： configure_ssh
 #   7.配置SELinux ： configure_selinux
 #   8.配置系统日志 ： configure_logging
@@ -40,7 +40,6 @@
 #   11.配置网络安全 ： configure_network_security
 #   12.配置Cron和at服务 ： configure_cron
 #   13.自动配置 chronyd 同步时间 ： configure_time
-#   14.配置系统审计 ： configure_audit
 #   15.安装安全工具 ： install_security_tools
 #   16.配置定时任务 ： configure_scheduled_tasks(未开启)
 #   17.显示完成信息 ： show_completion
@@ -90,28 +89,6 @@ check_root() {
         echo -e "${RED}错误：此脚本需要root权限运行${NC}"
         exit 1
     fi
-}
-
-
-# 修改主机名
-set_hostname() {
-	hostnamectl set-hostname ${HOSTNAME}
-}
-
-# 安装基础软件包
-install_base_software(){
-    
-	dnf install -y vim wget curl lrzsz net-tools lsof bash-completion yum-utils tar zip unzip sudo cronie chrony policycoreutils-python-utils
-
-    
-    # 安装 EPEL 仓库
-    dnf install -y epel-release
-    dnf makecache
-
-    # 启用rc-local
-	systemctl enable rc-local
-	systemctl start rc-local
-    chmod +x /etc/rc.d/rc.local
 }
 
 # 记录日志函数
@@ -167,6 +144,26 @@ show_welcome() {
         exit 0
     fi
 }
+# 修改主机名
+set_hostname() {
+	hostnamectl set-hostname ${HOSTNAME}
+}
+
+# 安装基础软件包
+install_base_software(){
+    
+	dnf install -y vim wget curl lrzsz net-tools lsof bash-completion yum-utils tar zip unzip sudo cronie chrony policycoreutils-python-utils
+
+    
+    # 安装 EPEL 仓库
+    dnf install -y epel-release
+    dnf makecache
+
+    # 启用rc-local
+	systemctl enable rc-local
+	systemctl start rc-local
+    chmod +x /etc/rc.d/rc.local
+}
 
 # 系统更新
 update_system() {
@@ -210,21 +207,6 @@ config_ssh(){
 	log "INFO" "SSH 端口已修改为 ${SSH_PROT}"
 }
 
-# 配置防火墙
-configure_firewall() {
-    log "INFO" "配置防火墙..."
-    # 开放必要端口
-    firewall-cmd --zone=public --permanent --add-service=http
-    firewall-cmd --zone=public --permanent --add-service=https
-    
-    # 重新加载防火墙规则
-    firewall-cmd --reload
-    
-    log "INFO" "防火墙配置完成，SSH端口: $ssh_port"
-    log "INFO" "已开放服务: HTTP, HTTPS"
-    
-    return 0
-}
 
 # 配置SSH安全
 configure_ssh() {
@@ -516,102 +498,6 @@ configure_time(){
 	log "INFO" "chronyd 同步时间完成"
 }
 
-# 配置系统审计
-configure_audit() {
-    log "INFO" "配置系统审计..."
-    
-    # 安装auditd
-    dnf -y install audit audit-libs
-    
-    # 备份原始配置
-    cp /etc/audit/auditd.conf /etc/audit/auditd.conf.bak
-    log "INFO" "已备份审计配置: /etc/audit/auditd.conf.bak"
-    
-    # 配置auditd
-    sed -i 's/max_log_file = 8/max_log_file = 100/g' /etc/audit/auditd.conf
-    sed -i 's/max_log_file_action = ROTATE/max_log_file_action = KEEP_LOGS/g' /etc/audit/auditd.conf
-    sed -i 's/num_logs = 5/num_logs = 50/g' /etc/audit/auditd.conf
-    
-    # 配置审计规则
-    cat > /etc/audit/rules.d/audit.rules << "EOF"
-# 基本审计规则
-## 登录和认证
--w /var/log/faillog -p wa -k logins
--w /var/log/lastlog -p wa -k logins
--w /var/log/tallylog -p wa -k logins
-
-## 账户和权限
--w /etc/group -p wa -k identity
--w /etc/passwd -p wa -k identity
--w /etc/gshadow -p wa -k identity
--w /etc/shadow -p wa -k identity
--w /etc/security/opasswd -p wa -k identity
-
-## 关键文件和目录
--w /etc/sudoers -p wa -k sudo
--w /etc/ssh/sshd_config -p wa -k sshd
--w /etc/selinux/ -p wa -k selinux
--w /etc/grub2.cfg -p wa -k bootloader
--w /etc/localtime -p wa -k time-change
-
-## 系统事件
--w /var/log/audit/ -p wa -k auditd
--w /etc/sysctl.conf -p wa -k sysctl
--w /usr/bin/newgrp -p x -k privileged
--w /usr/bin/sudo -p x -k privileged
--w /usr/bin/su -p x -k privileged
-
-## 内核模块
--w /sbin/insmod -p x -k modules
--w /sbin/rmmod -p x -k modules
--w /sbin/modprobe -p x -k modules
--a always,exit -F arch=b64 -S init_module,finit_module -k modules
-
-## 关键系统调用
--a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
--a always,exit -F arch=b32 -S adjtimex -S settimeofday -k time-change
--a always,exit -F arch=b64 -S clock_settime -k time-change
--a always,exit -F arch=b32 -S clock_settime -k time-change
--a always,exit -F arch=b64 -S clone -S fork -S vfork -k process
--a always,exit -F arch=b32 -S clone -S fork -S vfork -k process
-
-## 网络活动
--a always,exit -F arch=b64 -S socket -S bind -S connect -k network
--a always,exit -F arch=b32 -S socket -S bind -S connect -k network
-
-## 特权命令
--a always,exit -F path=/usr/bin/sudo -F perm=x -F auid>=1000 -F auid!=unset -k privileged
--a always,exit -F path=/usr/bin/newgrp -F perm=x -F auid>=1000 -F auid!=unset -k privileged
--a always,exit -F path=/usr/bin/passwd -F perm=x -F auid>=1000 -F auid!=unset -k privileged
-
-## 敏感文件
--a always,exit -F path=/etc/issue -F perm=wa -F auid>=1000 -F auid!=unset -k etc-files
--a always,exit -F path=/etc/issue.net -F perm=wa -F auid>=1000 -F auid!=unset -k etc-files
--a always,exit -F path=/etc/motd -F perm=wa -F auid>=1000 -F auid!=unset -k etc-files
--a always,exit -F path=/etc/group -F perm=wa -F auid>=1000 -F auid!=unset -k etc-files
--a always,exit -F path=/etc/passwd -F perm=wa -F auid>=1000 -F auid!=unset -k etc-files
--a always,exit -F path=/etc/shadow -F perm=wa -F auid>=1000 -F auid!=unset -k etc-files
--a always,exit -F path=/etc/gshadow -F perm=wa -F auid>=1000 -F auid!=unset -k etc-files
--a always,exit -F path=/etc/sudoers -F perm=r -F auid>=1000 -F auid!=unset -k sudoers
-
-## 审计配置
--w /etc/audit/ -p wa -k auditd
--w /etc/libaudit.conf -p wa -k auditd
--w /etc/audisp/ -p wa -k auditd
-
-# 性能优化
--f 2
-EOF
-
-    # 启用并启动auditd服务
-    systemctl enable auditd
-    systemctl restart auditd
-    
-    log "INFO" "系统审计配置完成"
-    
-    return 0
-}
-
 # 安装安全工具
 install_security_tools() {
     log "INFO" "安装安全工具..."
@@ -793,37 +679,26 @@ show_completion() {
     echo "2. 部分安全配置可能需要重启系统才能完全生效"
     echo "3. 请确保SSH密钥已正确配置，否则可能无法登录系统"
     echo "4. 建议在生产环境使用前进行全面测试"
-    echo ""
-    echo "推荐后续操作:"
-    echo "1. 配置邮件服务以接收安全警报"
-    echo "2. 设置定期备份重要数据"
-    echo "3. 考虑配置入侵检测系统(IDS)或入侵防御系统(IPS)"
-    echo "4. 定期审查系统日志和安全检查报告"
-    echo ""
-    
-    read -p "是否需要重启系统? (y/n): " choice
-    if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-        log "INFO" "系统将在3秒后重启！"
-        sleep 3
-        reboot
-    fi
+
+    echo "系统准备重启！"
+    reboot
+
 }
 
 # 主函数
 main() {
 	check_os
     check_root
-	set_hostname
-    install_base_software
     init_log
     show_welcome
     
     log "INFO" "开始Rocky Linux 9 系统初始化与安全加固"
     
     # 按顺序执行各个安全加固步骤
+    set_hostname
+    install_base_software
     update_system
 	config_ssh
-    #configure_firewall
     configure_ssh
     configure_selinux
     configure_logging
@@ -832,7 +707,6 @@ main() {
     configure_network_security
     configure_cron
 	configure_time
-    configure_audit
     install_security_tools
     # configure_scheduled_tasks
     
