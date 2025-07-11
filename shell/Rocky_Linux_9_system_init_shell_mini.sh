@@ -705,8 +705,7 @@ main() {
 	
 	# 腾讯云执行这个会远程不了SSH!
     # configure_accounts
-	
-	configure_resource_limits
+	# configure_resource_limits
 	configure_network_security
     configure_cron
 	configure_time
