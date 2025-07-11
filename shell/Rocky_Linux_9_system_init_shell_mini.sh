@@ -413,9 +413,9 @@ net.ipv4.tcp_max_syn_backlog = 2048
 net.ipv4.tcp_synack_retries = 3
 
 # 禁用IP转发
-net.ipv4.ip_forward = 0
+#net.ipv4.ip_forward = 0
 # 启用IP转发，改为此配置，并且执行生效： sysctl -p
-# net.ipv4.ip_forward = 1
+net.ipv4.ip_forward = 1
 
 
 # 禁用IPv6
@@ -702,14 +702,16 @@ main() {
     configure_ssh
     configure_selinux
     configure_logging
-    configure_accounts
-    configure_resource_limits
-    configure_network_security
+	
+	# 腾讯云执行这个会远程不了SSH!
+    # configure_accounts
+	
+	configure_resource_limits
+	configure_network_security
     configure_cron
 	configure_time
     install_security_tools
     # configure_scheduled_tasks
-    
     show_completion
     
     log "INFO" "Rocky Linux 9 系统初始化与安全加固脚本执行完毕"
