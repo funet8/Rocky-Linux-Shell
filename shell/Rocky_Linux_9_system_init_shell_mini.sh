@@ -32,7 +32,7 @@
 #   3.更新系统 ： update_system
 #   4.修改SSH端口 ： config_ssh
 #   5.配置防火墙 ： configure_firewall (取消)
-#   6.配置SSH安全 ： configure_ssh
+#   6.配置SSH安全 ： configure_ssh_key
 #   7.配置SELinux ： configure_selinux
 #   8.配置系统日志 ： configure_logging
 #   9.配置账户安全 ： configure_accounts
@@ -41,7 +41,6 @@
 #   12.配置Cron和at服务 ： configure_cron
 #   13.自动配置 chronyd 同步时间 ： configure_time
 #   15.安装安全工具 ： install_security_tools
-#   16.配置定时任务 ： configure_scheduled_tasks(未开启)
 #   17.显示完成信息 ： show_completion
 #   18.记录日志 ：log
 #   19.初始化日志 ： init_log
@@ -209,7 +208,7 @@ config_ssh(){
 
 
 # 配置SSH安全
-configure_ssh() {
+configure_ssh_key() {
     log "INFO" "配置SSH安全..."
     
     # 备份原始配置
@@ -248,20 +247,17 @@ configure_selinux() {
     cp /etc/selinux/config /etc/selinux/config.bak
     log "INFO" "已备份SELinux配置文件: /etc/selinux/config.bak"
     
-    # 设置SELinux为强制模式
-    sed -i 's/SELINUX=permissive/SELINUX=enforcing/g' /etc/selinux/config
-    sed -i 's/SELINUX=disabled/SELINUX=enforcing/g' /etc/selinux/config
-    
-    # 检查当前SELinux状态
-    current_status=$(getenforce)
-    if [ "$current_status" != "Enforcing" ]; then
-        log "WARNING" "SELinux当前状态为 $current_status，需要重启系统以应用更改"
-        log "WARNING" "当前配置已设置为强制模式，重启后生效"
-    else
-        log "INFO" "SELinux已处于强制模式"
-    fi
-    
-    return 0
+    # 临时关闭 SELinux
+    log "临时关闭 SELinux..."
+    setenforce 0
+
+    # 永久关闭 SELinux
+    log "永久关闭 SELinux..."
+    sed -i 's/^SELINUX=enforcing$/SELINUX=disabled/' /etc/selinux/config
+    sed -i 's/^SELINUX=permissive$/SELINUX=disabled/' /etc/selinux/config
+
+    # 重启系统以生效更改
+    log "系统将重启以使更改生效..."
 }
 
 # 配置系统日志
@@ -535,135 +531,6 @@ install_security_tools() {
     return 0
 }
 
-# 配置定时任务
-configure_scheduled_tasks() {
-    log "INFO" "配置定时任务..."
-    
-    # 创建安全检查脚本
-    cat > /usr/local/bin/security_check.sh << "EOF"
-#!/bin/bash
-
-# 安全检查脚本
-LOG_FILE="/var/log/security_check_$(date +%Y%m%d).log"
-DATE=$(date "+%Y-%m-%d %H:%M:%S")
-
-echo "==========================================" > $LOG_FILE
-echo "安全检查报告 - $DATE" >> $LOG_FILE
-echo "==========================================" >> $LOG_FILE
-echo "" >> $LOG_FILE
-
-# 检查系统更新
-echo "系统更新状态:" >> $LOG_FILE
-dnf check-update >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查登录失败
-echo "最近登录失败记录:" >> $LOG_FILE
-lastb | head -n 10 >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查root登录
-echo "最近root登录记录:" >> $LOG_FILE
-last root | head -n 10 >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查系统日志
-echo "系统安全日志:" >> $LOG_FILE
-grep -i "failed\|error\|denied\|refused\|invalid" /var/log/secure | tail -n 20 >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查监听端口
-echo "当前监听端口:" >> $LOG_FILE
-ss -tuln >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查可疑进程
-echo "可疑进程:" >> $LOG_FILE
-ps aux | grep -v grep | egrep "root|sudo|bash|sh|python|perl" | awk '$3 > 10 || $4 > 10' >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查开放文件
-echo "打开的文件数量:" >> $LOG_FILE
-lsof | wc -l >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查SELinux状态
-echo "SELinux状态:" >> $LOG_FILE
-getenforce >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查防火墙状态
-echo "防火墙状态:" >> $LOG_FILE
-firewall-cmd --list-all >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查磁盘使用情况
-echo "磁盘使用情况:" >> $LOG_FILE
-df -h >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查内存使用情况
-echo "内存使用情况:" >> $LOG_FILE
-free -m >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查CPU使用情况
-echo "CPU使用情况:" >> $LOG_FILE
-top -bn1 | head -n 5 >> $LOG_FILE 2>&1
-echo "" >> $LOG_FILE
-
-# 检查AIDE完整性
-echo "文件完整性检查:" >> $LOG_FILE
-if [ -f "/usr/sbin/aide" ]; then
-    /usr/sbin/aide --check >> $LOG_FILE 2>&1
-else
-    echo "AIDE未安装" >> $LOG_FILE
-fi
-echo "" >> $LOG_FILE
-
-# 检查rkhunter
-echo "Rootkit检查:" >> $LOG_FILE
-if [ -f "/usr/bin/rkhunter" ]; then
-    /usr/bin/rkhunter --check --skip-keypress >> $LOG_FILE 2>&1
-else
-    echo "rkhunter未安装" >> $LOG_FILE
-fi
-echo "" >> $LOG_FILE
-
-# 发送邮件通知（如果配置了邮件）
-if [ -x "/usr/bin/mail" ] && [ -f "/root/.forward" ]; then
-    mail -s "系统安全检查报告 - $DATE" root < $LOG_FILE
-fi
-
-echo "安全检查完成: $DATE" >> $LOG_FILE
-EOF
-
-    # 设置脚本权限
-    chmod +x /usr/local/bin/security_check.sh
-    
-    # 添加到crontab
-    if ! crontab -l | grep -q "security_check.sh"; then
-        (crontab -l 2>/dev/null; echo "0 3 * * * /usr/local/bin/security_check.sh") | crontab -
-        log "INFO" "已添加每日安全检查任务"
-    fi
-    
-    # 添加每周系统更新任务
-    #if ! crontab -l | grep -q "dnf update"; then
-    #    (crontab -l 2>/dev/null; echo "0 2 * * 0 dnf -y update && dnf -y autoremove") | crontab -
-    #    log "INFO" "已添加每周系统更新任务"
-    #fi
-    
-    # 添加每周AIDE数据库更新任务
-    if [ -f "/usr/sbin/aide" ] && ! crontab -l | grep -q "aide --update"; then
-        (crontab -l 2>/dev/null; echo "0 4 * * 0 /usr/sbin/aide --update && mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz") | crontab -
-        log "INFO" "已添加每周AIDE数据库更新任务"
-    fi
-    
-    log "INFO" "定时任务配置完成"
-    
-    return 0
-}
-
 # 显示完成信息
 show_completion() {
     log "INFO" "系统初始化与安全加固完成"
@@ -693,24 +560,19 @@ main() {
     show_welcome
     
     log "INFO" "开始Rocky Linux 9 系统初始化与安全加固"
-    
-    # 按顺序执行各个安全加固步骤
     set_hostname
     install_base_software
+    config_ssh
     update_system
-	config_ssh
-    configure_ssh
-    configure_selinux
+    configure_ssh_key
+    #configure_selinux
     configure_logging
-	
-	# 腾讯云执行这个会远程不了SSH!
-    # configure_accounts
-	# configure_resource_limits
+    configure_accounts
+	configure_resource_limits
 	configure_network_security
     configure_cron
 	configure_time
     install_security_tools
-    # configure_scheduled_tasks
     show_completion
     
     log "INFO" "Rocky Linux 9 系统初始化与安全加固脚本执行完毕"
