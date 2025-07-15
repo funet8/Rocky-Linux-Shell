@@ -298,8 +298,9 @@ systemctl start php8.3-fpm.service
 }
 config_firewall(){
     # 配置防火墙
-    firewall-cmd --permanent --add-port=${PHP_FPM_PORT}/tcp
+    firewall-cmd --zone=public --add-port=${PHP_FPM_PORT}/tcp --permanent
     firewall-cmd --reload
+    firewall-cmd --zone=public --list-ports
 }
 
 
