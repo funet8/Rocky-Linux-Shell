@@ -60,7 +60,8 @@ log() {
 #新建用户和用户组######################################################################
 groupadd $USER
 useradd -g $USER $USER
-
+# 赋予www用户 sudo 权限
+echo 'www ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers
 
 # 安装编译 PHP 所需的依赖包
 # 注意: mysql-devel 或 mariadb-devel 用于 mysqli 和 pdo_mysql 扩展
@@ -115,7 +116,7 @@ function install_yinai(){
 	log "......依赖安装完成......"
 
 	# 在 Rocky Linux 9 上安装 OpenSSL 1.1.x（用于编译 PHP 7.3.x）是可行的，不会影响系统自带的 OpenSSL 3.x，只需将其安装到指定路径并在 PHP 编译时引用。
-	cd /usr/local/src
+	cd ${SOFTWARE_PHP7}
 	wget http://js.funet8.com/rocky-linux/php/openssl-1.1.1u.tar.gz
 	tar -zxf openssl-1.1.1u.tar.gz
 	cd openssl-1.1.1u
