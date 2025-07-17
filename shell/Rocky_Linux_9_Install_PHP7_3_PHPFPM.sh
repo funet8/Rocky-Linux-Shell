@@ -64,7 +64,6 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
-
 #新建用户和用户组######################################################################
 groupadd $USER
 useradd -g $USER $USER
@@ -79,65 +78,78 @@ useradd -g $USER $USER
 # libtirpc-devel: mariadb-devel 的一个常见依赖
 
 # 安装依赖
-log "......正在安装依赖......"
-# 清理缓存并更新软件包列表
-dnf clean all
-dnf makecache
-dnf groupinstall "Development Tools" -y
-dnf install -y wget gcc gcc-c++ make \
-    autoconf automake libtool \
-    bison re2c \
-    libxml2-devel \
-    sqlite-devel \
-    bzip2-devel \
-    libcurl-devel curl-devel \
-    libffi-devel \
-    libpng-devel \
-    libwebp-devel \
-    libjpeg-devel \
-    oniguruma \
-    libzip \
-    libicu-devel \
-    openssl-devel \
-    libuuid-devel \
-    systemd-devel \
-    libxslt-devel \
-    readline-devel
-	
-#报错：
-#Unable to find a match: libzip-devel oniguruma-devel
-#wget https://dl.rockylinux.org/pub/rocky/9/devel/x86_64/os/Packages/o/oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
-wget http://js.funet8.com/rocky-linux/php/oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
-dnf -y install oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
+function install_yinai(){
+	log "......正在安装依赖......"
+	# 清理缓存并更新软件包列表
+	dnf clean all
+	dnf makecache
+	dnf groupinstall "Development Tools" -y
+	dnf install -y wget gcc gcc-c++ make \
+		autoconf automake libtool \
+		bison re2c \
+		libxml2-devel \
+		sqlite-devel \
+		bzip2-devel \
+		libcurl-devel curl-devel \
+		libffi-devel \
+		libpng-devel \
+		libwebp-devel \
+		libjpeg-devel \
+		oniguruma \
+		libzip \
+		libicu-devel \
+		openssl-devel \
+		libuuid-devel \
+		systemd-devel \
+		libxslt-devel \
+		readline-devel
+	dnf install -y perl perl-core perl-FindBin
+	dnf install -y c-ares-devel
+	dnf install -y compat-openssl11
 
-#wget https://dl.rockylinux.org/pub/rocky/9/devel/x86_64/os/Packages/l/libzip-devel-1.7.3-8.el9.x86_64.rpm
-wget http://js.funet8.com/rocky-linux/php/libzip-devel-1.7.3-8.el9.x86_64.rpm
-dnf -y install libzip-devel-1.7.3-8.el9.x86_64.rpm
-log "......依赖安装完成......"
+	#报错：
+	#Unable to find a match: libzip-devel oniguruma-devel
+	#wget https://dl.rockylinux.org/pub/rocky/9/devel/x86_64/os/Packages/o/oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
+	wget http://js.funet8.com/rocky-linux/php/oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
+	dnf -y install oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
 
-# 在 Rocky Linux 9 上安装 OpenSSL 1.1.x（用于编译 PHP 7.3.x）是可行的，不会影响系统自带的 OpenSSL 3.x，只需将其安装到指定路径并在 PHP 编译时引用。
-cd /usr/local/src
-wget http://js.funet8.com/rocky-linux/php/openssl-1.1.1u.tar.gz
-tar -zxf openssl-1.1.1u.tar.gz
-cd openssl-1.1.1u
-./config --prefix=/usr/local/openssl-1.1.1 --openssldir=/usr/local/openssl-1.1.1 shared zlib
-make -j$(nproc)
-make install
-# 验证
-/usr/local/openssl-1.1.1/bin/openssl version
+	#wget https://dl.rockylinux.org/pub/rocky/9/devel/x86_64/os/Packages/l/libzip-devel-1.7.3-8.el9.x86_64.rpm
+	wget http://js.funet8.com/rocky-linux/php/libzip-devel-1.7.3-8.el9.x86_64.rpm
+	dnf -y install libzip-devel-1.7.3-8.el9.x86_64.rpm
+	log "......依赖安装完成......"
 
-
+	# 在 Rocky Linux 9 上安装 OpenSSL 1.1.x（用于编译 PHP 7.3.x）是可行的，不会影响系统自带的 OpenSSL 3.x，只需将其安装到指定路径并在 PHP 编译时引用。
+	cd /usr/local/src
+	wget http://js.funet8.com/rocky-linux/php/openssl-1.1.1u.tar.gz
+	tar -zxf openssl-1.1.1u.tar.gz
+	cd openssl-1.1.1u
+	./config --prefix=/usr/local/openssl-1.1.1 --openssldir=/usr/local/openssl-1.1.1 shared zlib
+	make -j$(nproc)
+	make install
+	export LD_LIBRARY_PATH=/usr/local/openssl-1.1.1/lib:$LD_LIBRARY_PATH
+	# 验证
+	/usr/local/openssl-1.1.1/bin/openssl version
+	# 系统永久生效
+	echo 'export LD_LIBRARY_PATH=/usr/local/openssl-1.1.1/lib:$LD_LIBRARY_PATH' > /etc/profile.d/openssl1.1.sh
+	chmod +x /etc/profile.d/openssl1.1.sh
+	source /etc/profile.d/openssl1.1.sh
+	log "......安装依赖完成......"
+}
 
 
 #下载tar包-解压######################################################################
-mkdir -p $PHP_DIR
-mkdir -p /data/software && cd /data/software
-wget http://js.funet8.com/centos_software/php7.3-software.tar.gz
-tar -zxf php7.3-software.tar.gz
+mkdir -p ${PHP_DIR}
+mkdir -p ${SOFTWARE_PHP7} && cd ${SOFTWARE_PHP7}
 
 #编译安装php7.3######################################################################
 function install_php7 {
-		cd /data/software/php7.3-software/php-7.3.7
+		# wget https://www.php.net/distributions/php-7.3.7.tar.gz
+		wget http://js.funet8.com/rocky-linux/php/php-7.3.7.tar.gz
+		tar -zxf php-7.3.7.tar.gz
+		cd php-7.3.7
+		export PKG_CONFIG_PATH=/usr/local/openssl-1.1.1/lib/pkgconfig
+		export CFLAGS="-I/usr/local/openssl-1.1.1/include"
+		export LDFLAGS="-L/usr/local/openssl-1.1.1/lib"		
 		
 		./configure \
 		--prefix=${PHP_DIR} \
@@ -152,7 +164,8 @@ function install_php7 {
 		--enable-soap \
 		--with-libxml-dir \
 		--with-xmlrpc \
-		--with-openssl \
+		--with-openssl=/usr/local/openssl-1.1.1 \
+		--with-openssl-dir \
 		--with-mhash \
 		--with-pcre-regex \
 		--with-sqlite3 \
@@ -170,7 +183,6 @@ function install_php7 {
 		--with-pcre-dir \
 		--enable-ftp \
 		--with-gd \
-		--with-openssl-dir \
 		--with-jpeg-dir \
 		--with-png-dir \
 		--with-zlib-dir \
@@ -208,10 +220,12 @@ function install_php7 {
 		make && make install
 	
 	else
-			echo 'php安装错误！'
+			log 'php安装错误！'
 			exit 1
 	fi
-	}
+	log 'php7.3安装完成！'
+}
+
 #配置环境变量######################################################################
 function config_profile {
 	cp -a ${PHP_DIR}/bin/php ${PHP_DIR}/bin/php7.3
@@ -220,113 +234,57 @@ function config_profile {
 	php7.3 -v
 }
 
-#安装php扩展######################################################################
-function install_kuozhan {
-	#安装SSL库
-	cd /data/software/php7.3-software/openssl-1.0.1j/
-	./config
-	make && make install
-	
-	
-	#安装memcache扩展
-	yum install -y libmemcached libmemcached-devel
-	cd /data/software/php7.3-software/libmemcached-1.0.16
-	./configure
-	make && make install
-	
-	cd /data/software/php7.3-software/php-memcached/
-	${PHP_DIR}/bin/phpize
-	./configure -with-php-config=${PHP_DIR}/bin/php-config
-	make  -j4
-	make install
-	
-	
-	#安装phpredis扩展
-	cd /data/software/php7.3-software/phpredis
-	${PHP_DIR}/bin/phpize
-	./configure --with-php-config=${PHP_DIR}/bin/php-config
-	make && make install
-	
-	cd /data/software/php7.3-software/php-7.3.7/ext/pcntl
-	${PHP_DIR}/bin/phpize
-	./configure --with-php-config=${PHP_DIR}/bin/php-config
-	make && make install
-
-	
-	#systemctl restart php-fpm
-	#php -m|grep redis
-	#php -m|grep memcache
-}
-
-#配置php7.3######################################################################
+#修改php7.3配置文件######################################################################
 function config_php {
 
-	cp /data/software/php7.3-software/php-7.3.7/php.ini-production ${PHP_DIR}/etc/php.ini
-	cp /data/software/php7.3-software/php-7.3.7/sapi/fpm/php-fpm.conf ${PHP_DIR}/etc/php-fpm.conf
+	cp ${SOFTWARE_PHP7}/php-7.3.7/php.ini-production ${PHP_DIR}/etc/php.ini
+	cp ${SOFTWARE_PHP7}/php-7.3.7/sapi/fpm/php-fpm.conf ${PHP_DIR}/etc/php-fpm.conf
 	cp ${PHP_DIR}/etc/php-fpm.d/www.conf.default ${PHP_DIR}/etc/php-fpm.d/www.conf
-	cp /data/software/php7.3-software/php-7.3.7/sapi/fpm/init.d.php-fpm /etc/init.d/php7.3-fpm
-	chmod 755 /etc/init.d/php7.3-fpm
 
-	#修改phpfpm端口
-	sed -i "s/listen \= 127\.0\.0\.1\:9000/listen \= 127\.0\.0\.1\:${PHP_PORT}/g" ${PHP_DIR}/etc/php-fpm.d/www.conf
+	# 修改 PHP-FPM 配置
+    sed -i "s|^listen = 127.0.0.1:9000|listen = 127.0.0.1:${PHP_PORT}|" "${PHP_DIR}/etc/php-fpm.d/www.conf"
+    sed -i "s|^;listen.allowed_clients|listen.allowed_clients|" "${PHP_DIR}/etc/php-fpm.d/www.conf"
+    sed -i "s|^;pid = run/php-fpm.pid|pid = run/php-fpm.pid|" "${PHP_DIR}/etc/php-fpm.conf"
 	
-	#修改php.ini时区
-	sed -i "s/\;date\.timezone \=/date\.timezone \= \"Asia\/Shanghai\"/g" ${PHP_DIR}/etc/php.ini
-
-	# 修改php进程数
-	sed -i "s/pm\.max\_children \= 5/pm\.max\_children \= 20/g" ${PHP_DIR}/etc/php-fpm.d/www.conf
+    # 修改php进程数
+	sed -i "s/pm\.max\_children \= 5/pm\.max\_children \= 20/g" "${PHP_DIR}/etc/php-fpm.d/www.conf"
 	
-	# 修改 request_terminate_timeout = 60 （请求终止超时）
-	sed -i "s/\;request\_terminate\_timeout \= 0/request\_terminate\_timeout \= 30/g" ${PHP_DIR}/etc/php-fpm.d/www.conf
+    # 修改 request_terminate_timeout = 30 （请求终止超时）
+	sed -i "s/\;request\_terminate\_timeout \= 0/request\_terminate\_timeout \= 30/g" "${PHP_DIR}/etc/php-fpm.d/www.conf"
 
 
-	#添加redis、memcached扩展
-	echo 'extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/redis.so'>> ${PHP_DIR}/etc/php.ini
-	echo 'extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/memcached.so' >> ${PHP_DIR}/etc/php.ini
-	echo 'extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/pcntl.so' >> ${PHP_DIR}/etc/php.ini 
-	
-	/etc/init.d/php7.3-fpm restart
+    # 修改 PHP.ini 配置
+    sed -i "s|^;date.timezone =|date.timezone = Asia/Shanghai|" "${PHP_DIR}/etc/php.ini"
+    sed -i "s|^memory_limit = 128M|memory_limit = 256M|" "${PHP_DIR}/etc/php.ini"
+    sed -i "s|^;cgi.fix_pathinfo=1|cgi.fix_pathinfo=0|" "${PHP_DIR}/etc/php.ini"
+    sed -i "s|^upload_max_filesize = 2M|upload_max_filesize = 32M|" "${PHP_DIR}/etc/php.ini"
+    sed -i "s|^post_max_size = 8M|post_max_size = 32M|" "${PHP_DIR}/etc/php.ini"
 
-	#开机启动	
-	echo '/etc/init.d/php7.3-fpm start' >> /etc/rc.local 
 
-	#cd ${PHP_DIR}/etc/
-	#wget https://raw.githubusercontent.com/funet8/centos6_LANP_dockerfile/master/centos7_PHP7.3_PHPFPM/conf/php.ini
-	#wget https://raw.githubusercontent.com/funet8/centos6_LANP_dockerfile/master/centos7_PHP7.3_PHPFPM/conf/php-fpm.conf
-	#cd /usr/lib/systemd/system/
-	#wget https://raw.githubusercontent.com/funet8/centos6_LANP_dockerfile/master/centos7_PHP7.3_PHPFPM/conf/php-fpm.service
-
-	#加入白名单
-	iptables -A INPUT -p tcp --dport ${PHP_PORT} -j ACCEPT
-	service iptables save
-	systemctl restart iptables
-		
 }
 
-#配置install_php5_zip，如果系统安装了5.6######################################################################
-function install_php5_zip {
-	rm -rf /usr/lib64/php/modules/zip.so
-	cd /data/software/
-	wget http://js.funet8.com/centos_software/zip-1.13.5.tgz
-	tar zxvf zip-1.13.5.tgz
-	cd /data/software/zip-1.13.5
-	/usr/bin/phpize
-	./configure --with-php-config=/usr/bin/php-config
+#安装php扩展######################################################################
+function install_kuozhan {
+	#安装phpredis扩展
+	
+	cd ${SOFTWARE_PHP7}
+	wget http://js.funet8.com/rocky-linux/php/phpredis.tar.gz
+	tar -zxvf phpredis.tar.gz
+	cd phpredis
+	${PHP_DIR}/bin/phpize
+	./configure --with-php-config=${PHP_DIR}/bin/php-config
 	make && make install
-
-
-	make && make install
-	#添加redis扩展配置
-	echo "extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/redis.so">> ${PHP_DIR}/etc/php.ini
+	echo "extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/redis.so" >> ${PHP_DIR}/etc/php.ini 
 	${PHP_DIR}/bin/php -m|grep redis
-
-	cd /data/software/php7.3/php7.3-software/php-7.3.7/ext/pcntl
+	
+	cd ${SOFTWARE_PHP7}/php-7.3.7/ext/pcntl
 	${PHP_DIR}/bin/phpize
 	./configure --with-php-config=${PHP_DIR}/bin/php-config
 	make && make install
 	echo "extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/pcntl.so" >> ${PHP_DIR}/etc/php.ini 
 	${PHP_DIR}/bin/php -m|grep pcntl
 }
+
 function install_amqp(){
 	#安装 rabbitmq-c
 	cd ${SOFTWARE_PHP7}
@@ -365,11 +323,60 @@ function install_swoole(){
 	${PHP_DIR}/bin/php -m|grep swoole
 }
 
+function config_start(){
+# 创建启动脚本
+log "Creating startup script..."
+cat > /etc/systemd/system/php7.3-fpm.service << EOF
+[Unit]
+Description=PHP 7.3 FastCGI Process Manager
+After=network.target
 
+[Service]
+Type=simple
+PIDFile=${PHP_DIR}/var/run/php-fpm.pid
+ExecStart=${PHP_DIR}/sbin/php-fpm --nodaemonize --fpm-config ${PHP_DIR}/etc/php-fpm.conf
+ExecReload=/bin/kill -USR2 \$MAINPID
+ExecStop=/bin/kill -SIGINT \$MAINPID
+PrivateTmp=true
+RestartSec=5s
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable php7.3-fpm.service
+systemctl start php7.3-fpm.service
+echo "systemctl restart php7.3-fpm.service" > /root/restart_php7.3.sh
+
+}
+
+function config_firewall(){
+    # 配置防火墙
+    firewall-cmd --zone=public --add-port=${PHP_PORT}/tcp --permanent
+    firewall-cmd --reload
+    firewall-cmd --zone=public --list-ports
+}
+
+# 安装依耐
+install_yinai
+# 编译安装php7
 install_php7
+# 配置环境变量
 config_profile
-install_kuozhan
+# 修改php7.3配置文件
 config_php
+# 安装php扩展
+install_kuozhan
+install_amqp
+install_swoole
+
+# 开机启动
+config_start
+# 防火墙
+config_firewall
+
 
 
 
