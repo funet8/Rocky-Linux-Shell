@@ -10,13 +10,15 @@
 # 安装扩展
 # 需要安装：
 # openssl
-# memcached
-# libmemcached
 # phpredis
 # pcntl
 # amqp
 # rabbitmq
 # swoole
+# 开机启动配置文件： /etc/systemd/system/php7.3-fpm.service
+# 启动命令： systemctl start php7.3-fpm.service
+# 停止命令： systemctl stop php7.3-fpm.service
+# 重启命令： systemctl restart php7.3-fpm.service
 
 # 使用：
 # gitee:
@@ -26,15 +28,6 @@
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_PHP7_3_PHPFPM.sh
 # sh Rocky_Linux_9_Install_PHP7_3_PHPFPM.sh
 # -------------------------------------------------------------------------------
-
-###########################################################
-# 1.下载PHP7.3.3源码包安装
-# 2.安装 openssl 、memcache 、phpredis扩展
-# 3.修改配端口7300，时区、PHP进程数等。
-# 4.安装目录 ${PHP_DIR} ，用户 www。
-###########################################################
-#上传php7.3-software.tar.gz 到 /data/software
-
 
 PHP_DIR=/data/app/php7.3		#php安装路径
 SOFTWARE_PHP7="/data/software/php7.3"
