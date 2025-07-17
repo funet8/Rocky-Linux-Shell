@@ -99,6 +99,9 @@ function install_yinai(){
 	dnf install -y perl perl-core perl-FindBin
 	dnf install -y c-ares-devel
 	dnf install -y compat-openssl11
+	dnf install -y freetype-devel
+	dnf install -y gmp-devel
+
 
 	#报错：
 	#Unable to find a match: libzip-devel oniguruma-devel
@@ -136,6 +139,7 @@ mkdir -p ${SOFTWARE_PHP7} && cd ${SOFTWARE_PHP7}
 
 #编译安装php7.3######################################################################
 function install_php7 {
+		cd ${SOFTWARE_PHP7}
 		# wget https://www.php.net/distributions/php-7.3.7.tar.gz
 		wget http://js.funet8.com/rocky-linux/php/php-7.3.7.tar.gz
 		tar -zxf php-7.3.7.tar.gz
