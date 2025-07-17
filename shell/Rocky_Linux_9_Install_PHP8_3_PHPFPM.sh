@@ -86,10 +86,25 @@ log "......正在安装依赖......"
 # 清理缓存并更新软件包列表
 dnf clean all
 dnf makecache
-dnf install -y  wget libxml2-devel sqlite-devel bzip2-devel libcurl-devel libffi-devel libpng-devel libwebp-devel libjpeg-devel oniguruma libzip
-dnf install -y gcc make autoconf automake libtool bison gcc  libicu-devel openssl-devel
-dnf install -y gcc gcc-c++ make autoconf automake libtool bison re2c  openssl-devel libxml2-devel libpng-devel  libjpeg-devel  libicu-devel curl-devel   sqlite-devel libuuid-devel systemd-devel libxslt-devel readline-devel
-
+dnf install -y wget gcc gcc-c++ make \
+    autoconf automake libtool \
+    bison re2c \
+    libxml2-devel \
+    sqlite-devel \
+    bzip2-devel \
+    libcurl-devel curl-devel \
+    libffi-devel \
+    libpng-devel \
+    libwebp-devel \
+    libjpeg-devel \
+    oniguruma \
+    libzip \
+    libicu-devel \
+    openssl-devel \
+    libuuid-devel \
+    systemd-devel \
+    libxslt-devel \
+    readline-devel
 #dnf install -y libzip-devel oniguruma-devel
 
 #wget https://dl.rockylinux.org/pub/rocky/9/devel/x86_64/os/Packages/o/oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm

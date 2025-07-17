@@ -37,8 +37,10 @@
 
 
 PHP_DIR=/data/app/php7.3		#php安装路径
+SOFTWARE_PHP7="/data/software/php7.3"
 USER=www						#用户
 PHP_PORT='7300'					#php-fpm端口
+PHP_LOG="/data/app/php7.3-install.log"
 
 
 # 检查当前用户是否为 root
@@ -56,17 +58,17 @@ if ! grep -q "Rocky Linux 9" /etc/os-release; then
         exit 1
     fi
 fi
+# 日志函数
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> $PHP_LOG
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
 
 #新建用户和用户组######################################################################
 groupadd $USER
 useradd -g $USER $USER
 
-# 启用 CodeReady Linux Builder (CRB) 仓库，通常包含更多开发包
-echo "尝试启用 crb (CodeReady Linux Builder) 仓库..."
-dnf config-manager --set-enabled crb
-if [ $? -ne 0 ]; then
-    echo "警告: 启用 crb 仓库失败，某些依赖可能无法找到。尝试继续安装。"
-fi
 
 # 安装编译 PHP 所需的依赖包
 # 注意: mysql-devel 或 mariadb-devel 用于 mysqli 和 pdo_mysql 扩展
@@ -75,40 +77,56 @@ fi
 # libicu-devel 用于 intl 扩展
 # libwebp-devel 用于 webp 支持 (GD库)
 # libtirpc-devel: mariadb-devel 的一个常见依赖
-dnf install -y gcc make autoconf libxml2-devel libcurl-devel openssl-devel \
-    libjpeg-turbo-devel libpng-devel freetype-devel mariadb-devel \
-    libzip-devel oniguruma-devel libicu-devel libwebp-devel \
-    bzip2-devel readline-devel sqlite-devel zlib-devel \
-    systemd-devel libtirpc-devel # systemd-devel for systemd integration in FPM
-if [ $? -ne 0 ]; then
-    echo "错误: 依赖包安装失败。请检查您的网络连接或仓库配置。"
-    exit 1
-fi
-echo "依赖包安装完成。"
-echo ""
 
-# 创建安装目录并设置权限
-mkdir -p ${INSTALL_DIR}
-chown -R ${PHP_USER}:${PHP_USER} ${INSTALL_DIR}
-chmod -R 755 ${INSTALL_DIR}
-echo "安装目录 ${INSTALL_DIR} 已创建并设置权限。"
-echo ""
+# 安装依赖
+log "......正在安装依赖......"
+# 清理缓存并更新软件包列表
+dnf clean all
+dnf makecache
+dnf groupinstall "Development Tools" -y
+dnf install -y wget gcc gcc-c++ make \
+    autoconf automake libtool \
+    bison re2c \
+    libxml2-devel \
+    sqlite-devel \
+    bzip2-devel \
+    libcurl-devel curl-devel \
+    libffi-devel \
+    libpng-devel \
+    libwebp-devel \
+    libjpeg-devel \
+    oniguruma \
+    libzip \
+    libicu-devel \
+    openssl-devel \
+    libuuid-devel \
+    systemd-devel \
+    libxslt-devel \
+    readline-devel
+	
+#报错：
+#Unable to find a match: libzip-devel oniguruma-devel
+#wget https://dl.rockylinux.org/pub/rocky/9/devel/x86_64/os/Packages/o/oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
+wget http://js.funet8.com/rocky-linux/php/oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
+dnf -y install oniguruma-devel-6.9.6-1.el9.6.x86_64.rpm
 
-# 安装 libzip ######################################################################
-cd /data/software
-wget https://libzip.org/download/libzip-1.8.0.tar.gz
-tar -xzf libzip-1.8.0.tar.gz
-cd libzip-1.8.0
-mkdir build
-cd build
-cmake ..
-make && make install
-# 将新库路径加入动态链接器的搜索路径：
-echo "/usr/local/lib" | tee /etc/ld.so.conf.d/libzip.conf
-# 添加搜索路径到配置文件
-echo '/usr/local/lib64 /usr/local/lib /usr/lib /usr/lib64'>>/etc/ld.so.conf
-# 更新配置
-ldconfig -v
+#wget https://dl.rockylinux.org/pub/rocky/9/devel/x86_64/os/Packages/l/libzip-devel-1.7.3-8.el9.x86_64.rpm
+wget http://js.funet8.com/rocky-linux/php/libzip-devel-1.7.3-8.el9.x86_64.rpm
+dnf -y install libzip-devel-1.7.3-8.el9.x86_64.rpm
+log "......依赖安装完成......"
+
+# 在 Rocky Linux 9 上安装 OpenSSL 1.1.x（用于编译 PHP 7.3.x）是可行的，不会影响系统自带的 OpenSSL 3.x，只需将其安装到指定路径并在 PHP 编译时引用。
+cd /usr/local/src
+wget http://js.funet8.com/rocky-linux/php/openssl-1.1.1u.tar.gz
+tar -zxf openssl-1.1.1u.tar.gz
+cd openssl-1.1.1u
+./config --prefix=/usr/local/openssl-1.1.1 --openssldir=/usr/local/openssl-1.1.1 shared zlib
+make -j$(nproc)
+make install
+# 验证
+/usr/local/openssl-1.1.1/bin/openssl version
+
+
 
 
 #下载tar包-解压######################################################################
@@ -297,15 +315,61 @@ function install_php5_zip {
 	make && make install
 
 
-	cp -a /usr/bin/php /usr/bin/php5.6
-	rm -rf  /usr/bin/php
-	cp -a  ${PHP_DIR}/bin/php /usr/bin/php
+	make && make install
+	#添加redis扩展配置
+	echo "extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/redis.so">> ${PHP_DIR}/etc/php.ini
+	${PHP_DIR}/bin/php -m|grep redis
+
+	cd /data/software/php7.3/php7.3-software/php-7.3.7/ext/pcntl
+	${PHP_DIR}/bin/phpize
+	./configure --with-php-config=${PHP_DIR}/bin/php-config
+	make && make install
+	echo "extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/pcntl.so" >> ${PHP_DIR}/etc/php.ini 
+	${PHP_DIR}/bin/php -m|grep pcntl
 }
+function install_amqp(){
+	#安装 rabbitmq-c
+	cd ${SOFTWARE_PHP7}
+	# wget -c https://github.com/alanxz/rabbitmq-c/releases/download/v0.8.0/rabbitmq-c-0.8.0.tar.gz
+	wget -c http://js.funet8.com/centos_software/rabbitmq-php/rabbitmq-c-0.8.0.tar.gz
+	tar zxf rabbitmq-c-0.8.0.tar.gz
+	cd rabbitmq-c-0.8.0
+	./configure --prefix=/usr/local/rabbitmq-c-0.8.0-b
+	make && make install
+
+	# 安装 amqp-1.11.0 扩展
+	cd ${SOFTWARE_PHP7}
+	#wget -c http://pecl.php.net/get/amqp-1.11.0.tgz
+	wget -c http://js.funet8.com/centos_software/rabbitmq-php/amqp-1.11.0.tgz
+	tar -zxvf amqp-1.11.0.tgz 
+	cd  amqp-1.11.0
+	${PHP_DIR}/bin/phpize
+	./configure --with-php-config=${PHP_DIR}/bin/php-config --with-amqp --with-librabbitmq-dir=/usr/local/rabbitmq-c-0.8.0-b
+	make && make install
+	echo '[amqp]'>> ${PHP_DIR}/etc/php.ini 
+	echo "extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/amqp.so" >> ${PHP_DIR}/etc/php.ini 
+	${PHP_DIR}/bin/php -m|grep amqp
+}
+function install_swoole(){
+	#安装 swoole 扩展
+	dnf install -y c-ares-devel
+	cd ${SOFTWARE_PHP7}
+	wget http://js.funet8.com/centos_software/swoole-src-4.8.13.tar.gz
+	tar -zxvf swoole-src-4.8.13.tar.gz
+	cd swoole-src-4.8.13
+	${PHP_DIR}/bin/phpize
+	./configure --enable-openssl --enable-sockets --enable-mysqlnd --enable-swoole-curl --enable-cares  --with-php-config=${PHP_DIR}/bin/php-config
+	make && make install
+	echo "extension=${PHP_DIR}/lib/php/extensions/no-debug-non-zts-20180731/swoole.so" >> ${PHP_DIR}/etc/php.ini 
+	echo 'swoole.use_shortname = off' >> ${PHP_DIR}/etc/php.ini 
+	${PHP_DIR}/bin/php -m|grep swoole
+}
+
+
 install_php7
 config_profile
 install_kuozhan
 config_php
-#install_php5_zip
 
 
 
