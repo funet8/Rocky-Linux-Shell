@@ -21,12 +21,11 @@
 # github:
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_Vsftpd.sh
 # sh Rocky_Linux_9_Install_Vsftpd.sh
-# -------------------------------------------------------------------------------
 
 # 定义变量
 FTP_USER="www" 
 FTP_DIR="/data/wwwroot/ftp"
-FTP_LOG="/data/wwwroot/ftp_log/"
+FTP_LOG="/data/wwwroot/ftp_log"
 FTP_PORT='62920' #ftp访问端口
 # 虚拟用户名单和密码
 VIRT_USER_LIST='yxkj_web
@@ -338,3 +337,8 @@ systemctl status vsftpd
 # 修改用户的ftp目录：修改文件：/data/conf/vsftpd/vconf/zhts_new中的local_root=/data/wwwroot/ftp/zhts_new
 # 创建用户ftp目录 mkdir -p /data/wwwroot/ftp/zhts_new
 # 将用户固定在家目录 echo zhts_new >> /etc/vsftpd/chroot_list
+# mkdir -p /data/wwwroot/web/test.web.com /data/wwwroot/ftp/test/test.web.com
+# chown www.www -R /data/wwwroot/web /data/wwwroot/ftp/test
+# 绑定路径： mount --bind /data/wwwroot/web/test.web.com /data/wwwroot/ftp/test/test.web.com
+# 开机启动： echo "mount --bind /data/wwwroot/web/test.web.com /data/wwwroot/ftp/test/test.web.com" >> /etc/rc.local
+# 重启服务 systemctl restart vsftpd
