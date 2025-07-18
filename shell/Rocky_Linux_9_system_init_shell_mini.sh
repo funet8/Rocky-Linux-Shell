@@ -153,29 +153,50 @@ install_base_software(){
     
 	dnf install -y vim wget curl lrzsz net-tools lsof bash-completion yum-utils tar zip unzip sudo cronie chrony policycoreutils-python-utils
 
-    
     # 安装 EPEL 仓库
     dnf install -y epel-release
     dnf makecache
-
-    # 启用rc-local
-	systemctl enable rc-local
-	systemctl start rc-local
-    chmod +x /etc/rc.d/rc.local
 }
 
-# 系统更新
-update_system() {
-    log "INFO" "开始系统更新..."
-	
-    dnf clean all
-    dnf -y update
-    
-    if [ $? -eq 0 ]; then
-        log "INFO" "系统更新完成"
-    else
-        log "ERROR" "系统更新失败"
+#启用 /etc/rc.d/rc.local 开机启动
+start_rc_local(){
+systemctl enable rc-local &>/dev/null
+if [ $? -ne 0 ]; then
+    echo "rc-local.service 不存在，开始创建 systemd 单元..."
+    # 创建 rc-local.service 单元文件
+    cat <<EOF | sudo tee /etc/systemd/system/rc-local.service >/dev/null
+[Unit]
+Description=/etc/rc.d/rc.local Compatibility
+ConditionPathExists=/etc/rc.d/rc.local
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/etc/rc.d/rc.local start
+TimeoutSec=0
+RemainAfterExit=yes
+GuessMainPID=no
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    echo "已创建 rc-local.service"
+	# 创建 /etc/rc.d/rc.local 文件（如果不存在）
+    if [ ! -f /etc/rc.d/rc.local ]; then
+        sudo bash -c 'echo -e "#!/bin/bash\n\nexit 0" > /etc/rc.d/rc.local'
+      "已创建 /etc/rc.d/rc.local 文件并添加 exit 0"
     fi
+
+    # 添加执行权限
+    chmod +x /etc/rc.d/rc.local
+
+    # 重新加载 systemd 并启用 rc-local
+	systemctl daemon-reload
+	systemctl enable rc-local
+	systemctl start rc-local
+	echo "已启用 rc-local.service"
+fi
 }
 
 
@@ -562,6 +583,7 @@ main() {
     log "INFO" "开始Rocky Linux 9 系统初始化与安全加固"
     set_hostname
     install_base_software
+	start_rc_local
     config_ssh
     update_system
     configure_ssh_key
