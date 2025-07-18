@@ -6,6 +6,14 @@
 # Email:       star@xgss.net
 # Description: Rocky_Linux_9系统安装Vsftpd
 
+# 功能：Rocky Linux 9系统中源码包安装 Vsftpd 的shell脚本
+# 端口：62920
+# FTP用户： www
+# FTP日志存放路径： /data/wwwroot/ftp_log/
+# 登录用户名和密码： yxkj_web Password123 【请修改密码】
+# FTP配置文件：/data/conf/vsftpd/vsftpd.conf
+# 被动模式端口范围： 9000-9045
+
 # 使用：
 # gitee:
 # wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_Install_Vsftpd.sh
@@ -14,16 +22,6 @@
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_Vsftpd.sh
 # sh Rocky_Linux_9_Install_Vsftpd.sh
 # -------------------------------------------------------------------------------
-
-
-# 功能：Rocky Linux 9系统中源码包安装 Vsftpd 的shell脚本
-# 端口：62920
-# FTP用户： www
-# FTP日志存放路径： /data/wwwroot/ftp_log/
-# 登录用户名和密码： yxkj_web Password123
-# FTP配置文件：/data/conf/vsftpd/vsftpd.conf
-# 被动模式端口范围： 9000-9045
-
 
 # 定义变量
 FTP_USER="www" 
@@ -36,7 +34,21 @@ Password123'
 # 虚拟用户配置文件名
 VIRT_USER_CONF_FILE_NAME='yxkj_web'
 
+# 检查当前用户是否为 root
+if [[ $EUID -ne 0 ]]; then
+   echo "错误: 此脚本必须以 root 用户身份运行。"
+   exit 1
+fi
 
+# 检查操作系统是否为 Rocky Linux 9 (或类似的 RHEL 9 系列)
+if ! grep -q "Rocky Linux 9" /etc/os-release; then
+    echo "警告: 此脚本设计用于 Rocky Linux 9。在其他系统上可能无法正常工作。"
+    read -p "是否继续? (y/N): " choice
+    if [[ ! "$choice" =~ ^[yY]$ ]]; then
+        echo "安装已取消。"
+        exit 1
+    fi
+fi
 
 # 新建用户和用户组
 groupadd ${FTP_USER}
