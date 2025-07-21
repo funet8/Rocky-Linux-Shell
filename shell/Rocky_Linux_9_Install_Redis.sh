@@ -11,6 +11,8 @@
 # 配置所在的目录： /data/conf/
 # 密码： YpassWord666 【请修改密码】
 # redis持久化目录：/data/redis/端口号
+# redis日志： /data/redis/端口号/redis_端口号.log
+# 设置redis内存为 1024M
 
 
 # 使用：

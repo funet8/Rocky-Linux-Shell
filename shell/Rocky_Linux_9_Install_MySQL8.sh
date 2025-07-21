@@ -172,7 +172,7 @@ cat > ${Mysql_etc}/my.cnf <<EOF
 	#log-slave-updates = on
 	### 慢查询日志
 	# 打开慢查询日志功能
-	slow_query_log = 1
+	slow_query_log = ON
 	# 超过2秒的查询记录下来
 	long_query_time = 2
 	# 记录下没有使用索引的查询
@@ -263,8 +263,6 @@ cat > ${Mysql_etc}/my.cnf <<EOF
 	#innodb_log_file_size = 256M
 	# 日志缓冲区大小
 	innodb_log_buffer_size = 4M
-	# 事务在内存中的缓冲
-	#innodb_log_buffer_size = 3M
 	# 主库保持系统默认, 事务立即写入磁盘, 不会丢失任何一个事务
 	innodb_flush_log_at_trx_commit = 1
 	# mysql 的数据文件设置, 初始100, 以10M 自动扩展
