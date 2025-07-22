@@ -18,8 +18,10 @@
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_Docker.sh
 # sh Rocky_Linux_9_Install_Docker.sh
 
-# docker存储位置
+# 修改Docker镜像存储位置
 docker_file="/data/docker-lib"
+
+# 修改配置国内镜像源： /etc/docker/daemon.json 改成自己的地址。
 
 # 检查当前用户是否为 root
 if [[ $EUID -ne 0 ]]; then
@@ -73,7 +75,7 @@ function Modify_Conf(){
 	rsync -av /var/lib/docker $docker_file
 
 
-######配置国内镜像源	
+######配置国内镜像源
 mkdir -p /etc/docker
 cat <<EOF >/etc/docker/daemon.json
 {  
