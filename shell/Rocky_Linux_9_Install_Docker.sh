@@ -45,35 +45,26 @@ function Install_Docker(){
 	dnf clean all
 	dnf makecache
 	dnf install -y yum-utils device-mapper-persistent-data lvm2
-
 	# 添加 Docker 仓库
 	yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-
 	# 安装 Docker
 	dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-
 	# 启动 Docker 服务
 	systemctl start docker
-	
 	# 设置 Docker 开机启动
 	systemctl enable docker.service
-	
 	# 验证 Docker 安装
 	docker --version
-
 }
 
 function Modify_Conf(){
 ######修改docker默认存储位置
 	mkdir /home/data
 	ln -s /home/data /data
-	
 	mkdir -p $docker_file
 	systemctl stop docker.service
 	yum install -y rsync
 	rsync -av /var/lib/docker $docker_file
-
 
 ######配置国内镜像源
 mkdir -p /etc/docker

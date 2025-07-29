@@ -17,7 +17,6 @@
 # github:
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_Nodejs.sh
 # sh Rocky_Linux_9_Install_Nodejs.sh
-# -------------------------------------------------------------------------------
 
 # 设置变量
 NODE_HOME='/data/app/nodejs-v22.17.1'
@@ -39,7 +38,8 @@ if ! grep -q "Rocky Linux 9" /etc/os-release; then
     fi
 fi
 
-
+dnf clean all
+dnf makecache
 
 mkdir -p /data/software 
 mkdir -p /data/app/
@@ -49,6 +49,7 @@ cd /data/software
 # 备用下载
 wget http://js.funet8.com/rocky-linux/node-v22.17.1-linux-x64.tar.xz
 tar xf /data/software/node-v22.17.1-linux-x64.tar.xz -C /data/app/
+
 
 #重命名
 mv /data/app/node-v22.17.1-linux-x64/ ${NODE_HOME}
@@ -62,10 +63,9 @@ echo 'export PATH=${NODE_HOME}/bin:$PATH' >> /etc/profile
 ## 生效
 source /etc/profile
 
-
-
 ## 安装cnpm
 npm install -g cnpm --registry=https://registry.npmmirror.com/
+npm config set registry https://registry.npmmirror.com
 
 # 安装 yarn
 #如果你已经安装了 Node.js，那么可以直接使用 npm 安装 Yarn：
@@ -76,3 +76,10 @@ node -v
 npm -v
 cnpm -v
 yarn -v
+
+######
+# 另外的安装方法
+# 添加 Node.js 22.x LTS 仓库
+# curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
+# 安装 Node.js 和 NPM
+# dnf install -y nodejs
