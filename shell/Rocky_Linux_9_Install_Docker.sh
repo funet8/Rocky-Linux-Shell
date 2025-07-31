@@ -39,8 +39,6 @@ if ! grep -q "Rocky Linux 9" /etc/os-release; then
     fi
 fi
 
-
-function Install_Docker(){
 # 安装 Docker 依赖
 dnf clean all
 dnf makecache
@@ -50,12 +48,11 @@ yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce
 # 安装 Docker
 dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 # 启动 Docker 服务
-systemctl start docker
+systemctl start docker.service
 # 设置 Docker 开机启动
 systemctl enable docker.service
 # 验证 Docker 安装
 docker --version
-}
 
 function Modify_Conf(){
 ######修改docker默认存储位置
@@ -110,7 +107,7 @@ systemctl restart docker.service
 systemctl enable docker.service
 
 # 安装
-Install_Docker
+#Install_Docker
 
 # 修改docker配置
 Modify_Conf
