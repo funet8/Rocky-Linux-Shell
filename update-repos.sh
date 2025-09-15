@@ -9,7 +9,7 @@ git remote -v
 
 # 添加并提交更改
 git add .
-git commit -m "自动更新文件"
+git commit -m "mysql_backup_mysqldump.sh 添加文件，备份数据库脚本"
 
 # 推送至所有远程仓库
 git push github main  	# 推送到 GitHub
