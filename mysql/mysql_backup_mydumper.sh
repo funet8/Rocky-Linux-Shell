@@ -1,19 +1,15 @@
 #!/bin/sh 
 
 # 功能： 
-# 1.使用 mysqldump 备份每个数据库
+# 1.使用 mydumper 备份每个数据库
 # 2.可以排除某些数据库不备份
 # 3.使用 tar工具将mysql备份文件XXX.sql 打包为 XXX.sql.tar.gz 以节省硬盘空间。
 # 4.删除过期文件
 
-# 检查 mysqldump 是否存在且可执行
-if [ ! -x /usr/bin/mysqldump ]; then
-    echo "错误: 未找到 /usr/bin/mysqldump 或不可执行"
+if ! command -v mydumper >/dev/null 2>&1; then
+    echo "错误: 未找到 mydumper 命令"
     exit 1
 fi
-
-echo "mysqldump 检测通过，继续执行脚本..."
-
 
 function Backup_MySQL(){
 	############### 
@@ -24,7 +20,7 @@ function Backup_MySQL(){
 	#数据库地址、端口
 	Mysql_hosts='192.168.1.12'
 	Mysql_hosts_Name="NODE12"
-	Mysql_Prot='3306'
+	Mysql_Prot='61921'
 	
 	#备份的数据库名 grep -v忽略不需要备份的数据库
 	#Mysql_NAMES='DB01 DB02 DB03' # 指定备份DB01、DB02、DB03数据库。
@@ -58,11 +54,16 @@ function Backup_MySQL(){
 	########################################################################
 	##3.备份数据库
 	######################################################################## 
+	
+	# 清空目录
+	rm -rf $tmpBackupDir/*
 	for databases in $Mysql_NAMES;
 	do
 		dateTime=`date "+%Y.%m.%d %H:%M:%S"` 
 		echo "$dateTime START backup $databases!" >> $MySQLBackup_Log
-		/usr/bin/mysqldump -h$Mysql_hosts -P$Mysql_Prot -u$mysqlUser --skip-lock-tables -p"$mysqlPWD" $databases > $tmpBackupDir/$databases.sql
+		# 备份数据库
+		mydumper -h $Mysql_hosts -P $Mysql_Prot -u $mysqlUser  -p $mysqlPWD -B $databases  -o $tmpBackupDir/$databases/
+		
 		dateTime=`date "+%Y.%m.%d %H:%M:%S"` 
 		echo "$dateTime Database:$databases backup success!" >>$MySQLBackup_Log
 	done
@@ -73,21 +74,21 @@ function Backup_MySQL(){
 	for databases in $Mysql_NAMES;
 	do
 		date=`date -I` 
-		cd $tmpBackupDir 
-		tar czf $backupDir/$databases-$date.tar.gz ./$databases.sql
+		cd $tmpBackupDir
+		tar czf $backupDir/$databases-$date.tar.gz ./$databases
 	done
 }
 
 function Delete_MySQL(){
 	TARGET_DIR="/data/backup/mysql/mysql-*/*"
-	Days="7"
+	Days="14"
 
-	# 删除 7 天前的文件
+	# 删除 $Days 天前的文件
 	find "$TARGET_DIR" -type f -mtime +$Days -print -delete >> /dev/null 2>&1
 
 	# 说明：
 	# -type f      只匹配文件
-	# -mtime +7    修改时间在 7 天前
+	# -mtime +14    修改时间在 14 天前
 	# -print       删除前输出文件路径（方便记录日志）
 	# -delete      直接删除文件
 }
@@ -100,11 +101,6 @@ Backup_MySQL
 
 # 删除过期备份文件
 Delete_MySQL
-
-
-
-
-
 
 
 
