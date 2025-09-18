@@ -45,8 +45,15 @@ root@developer:~# wget -qO- https://raw.githubusercontent.com/pixelb/ps_mem/mast
 
 ## 使用 nench
 
+nench 会自动测试：
+
+CPU 性能、磁盘 I/O 读写速度、网络下载速度（测速多个区域）
+
 ```
 curl -sL wget.racing/nench.sh | bash
+或者
+
+curl -sL https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/monitor/nench.sh | bash
 ```
 
 ### 显示结果
@@ -95,6 +102,40 @@ IPv4 speedtests
 
 No IPv6 connectivity detected
 -------------------------------------------------
+```
+
+
+
+## 使用 bench.sh
+
+服务器硬件+网速+硬盘
+
+```
+
+curl -sL https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/monitor/bench.sh| bash
+
+源文件来自：https://raw.githubusercontent.com/teddysun/across/refs/heads/master/bench.sh
+
+```
+
+
+
+## 使用 superspeed测速
+
+
+
+国内主要运营商（电信/联通/移动）速度
+
+多个区域的 ping 值
+
+```
+这个文件已经找不到了：curl -fsSL https://bench.im/speedtest.sh | bash  
+
+
+或者
+bash <(curl -sL https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh)
+
+
 ```
 
 
