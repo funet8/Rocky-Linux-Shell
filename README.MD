@@ -22,11 +22,33 @@ Rocky Linux 的创始人 Greg Kurtzer 就是 CentOS 的创始人之一，因此�
 
 # 【文档目录】
 
-## [Rocky Linux 9 系统安装配置图解教程并做简单配置](https://vuepress-v2.xgss.net/Rocky-Linux/1.Rocky-Linux-9-%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%E5%9B%BE%E8%A7%A3%E6%95%99%E7%A8%8B%E5%B9%B6%E5%81%9A%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE.html)
+## [Rocky-Linux-9软件安装流程](https://vuepress-v2.xgss.net/Rocky-Linux/0.Rocky-Linux-9软件安装流程.html)
 
-## [Rocky-Linux-9常用命令备忘录](https://vuepress-v2.xgss.net/Rocky-Linux/2.Rocky-Linux-9%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%A4%87%E5%BF%98%E5%BD%95.html)
+# 【目录】
 
+## [Rocky Linux 9 系统安装配置图解教程并做简单配置](https://vuepress-v2.xgss.net/article/thpvukry/)
 
+## [Rocky-Linux-9常用命令备忘录](https://vuepress-v2.xgss.net/article/jddfyujx/)
+
+## [Rocky Linux 9 系统初始化与安全加固脚本](https://vuepress-v2.xgss.net/article/k5sevquu/)
+
+## [Rocky-Linux-9挂载硬盘的方法](https://vuepress-v2.xgss.net/Rocky-Linux/4.Rocky-Linux-9挂载硬盘的方法.html)
+
+## [Rocky-Linux-9-安装Nginx](https://vuepress-v2.xgss.net/Rocky-Linux/5.Rocky-Linux-9-安装Nginx.html)
+
+## [Rocky-Linux-9-源码包安装Mysql5.7](https://vuepress-v2.xgss.net/Rocky-Linux/6.Rocky-Linux-9-源码包安装Mysql5.7.html)
+
+## [Rocky-Linux-9-源码包安装Mysql8](https://vuepress-v2.xgss.net/Rocky-Linux/7.Rocky-Linux-9-源码包安装Mysql8.html)
+
+## [Rocky-Linux-9-源码包安装php8](https://vuepress-v2.xgss.net/Rocky-Linux/8.Rocky-Linux-9-源码包安装php8.html)
+
+## [Rocky-Linux-9-源码包安装php7](https://vuepress-v2.xgss.net/Rocky-Linux/9.Rocky-Linux-9-源码包安装php7.html)
+
+## [Rocky-Linux-9-安装VSFTP](https://vuepress-v2.xgss.net/Rocky-Linux/10.Rocky-Linux-9-安装FTP.html)
+
+## [Rocky-Linux-9-安装Redis](https://vuepress-v2.xgss.net/Rocky-Linux/11.Rocky-Linux-9-安装Redis.html)
+
+## [Rocky-Linux-9-安装Nodejs](https://vuepress-v2.xgss.net/Rocky-Linux/12.Rocky-Linux-9-安装Nodejs.html)
 
 
 

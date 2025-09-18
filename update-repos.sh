@@ -9,7 +9,7 @@ git remote -v
 
 # 添加并提交更改
 git add .
-git commit -m "更新监控文件"
+git commit -m "修改readme"
 
 # 推送至所有远程仓库
 git push github main  	# 推送到 GitHub
