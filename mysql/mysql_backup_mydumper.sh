@@ -19,7 +19,7 @@ function Backup_MySQL(){
 	mysqlPWD='123456'
 	#数据库地址、端口
 	Mysql_hosts='192.168.1.12'
-	Mysql_hosts_Name="NODE12"
+	Mysql_hosts_Name="Node12"
 	Mysql_Prot='61921'
 	
 	#备份的数据库名 grep -v忽略不需要备份的数据库

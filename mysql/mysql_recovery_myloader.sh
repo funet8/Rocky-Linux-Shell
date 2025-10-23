@@ -19,7 +19,7 @@ function Recovery_Mysql(){
 	Mysql_hosts_Name="NODE12"
 	Mysql_Prot='61921'
 	
-	# 备份的目录
+	# 数据库的备份的目录
 	RecoveryDir=/data2T/tmp/mysqlblackup/mysql-xiaoyouxi
 	
 	#日志
@@ -41,14 +41,14 @@ function Recovery_Mysql(){
 
 		start_time=$(date +%s)
 		
-		echo "开始备份： $databases，时间戳：$start_time" >>$MySQLBackup_Log
+		echo "开始恢复： $databases，时间戳：$start_time" >>$MySQLBackup_Log
 
 		myloader -u $mysqlUser -h $Mysql_hosts -P $Mysql_Prot -p $mysqlPWD -B $databases -d $RecoveryDir/$databases
 		
 		end_time=$(date +%s)
 		
-		echo "结束备份： $databases，时间戳：$end_time" >>$MySQLBackup_Log
-		echo "备份耗时：$((end_time - start_time)) 秒" >>$MySQLBackup_Log
+		echo "结束恢复： $databases，时间戳：$end_time" >>$MySQLBackup_Log
+		echo "恢复耗时：$((end_time - start_time)) 秒" >>$MySQLBackup_Log
 	done
 }
 

@@ -68,6 +68,19 @@ function check_os(){
 		exit 1
 	fi
 }
+
+
+# 创建MySQL用户和组
+function create_mysql_user(){
+    if ! id -u ${MYSQL_USER} >/dev/null 2>&1; then
+        groupadd -r ${MYSQL_GROUP} || true
+        useradd -M -g ${MYSQL_GROUP} -s /sbin/nologin ${MYSQL_USER} || true
+        echo "MySQL user and group created successfully."
+    else
+        echo "MySQL user and group already exist."
+    fi
+}
+
 # 安装依赖包
 function install_dependencies() {
     dnf install -y make cmake gcc gcc-c++ ncurses-devel  openssl-devel libtirpc wget
