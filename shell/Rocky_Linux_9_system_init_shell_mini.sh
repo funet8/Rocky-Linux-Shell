@@ -551,6 +551,8 @@ install_security_tools() {
     
     return 0
 }
+# 防止命令失效
+chmod +x /etc/rc.d/rc.local
 
 # 显示完成信息
 show_completion() {
