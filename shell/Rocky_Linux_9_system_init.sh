@@ -4,7 +4,7 @@
 # Date:        2026/01/31
 # Author:      star
 # Email:       star@xgss.net
-# Description: Rocky_Linux_9系统新安装后的初始设置
+# Description: Rocky_Linux_9系统新安装后的初始设置-简易版
 
 # 使用：
 # gitee:
