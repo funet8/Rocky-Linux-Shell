@@ -52,7 +52,7 @@ Rocky_Linux_9系统新安装后的初始设置
 # sh Rocky_Linux_9_system_init.sh
 # github:
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_system_init.sh
-# sh Rocky_Linux_9_system_init.sh
+sh Rocky_Linux_9_system_init.sh
 ```
 
 
@@ -129,6 +129,20 @@ Rocky_Linux_9系统新安装后的初始设置
 # wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_PHP7_3_PHPFPM.sh
 # sh Rocky_Linux_9_Install_PHP7_3_PHPFPM.sh
 ```
+
+## Rocky-Linux-9-安装Docker
+
+```
+# 使用：
+# gitee:
+# wget https://gitee.com/funet8/Rocky-Linux-Shell/raw/main/shell/Rocky_Linux_9_Install_Docker.sh
+# sh Rocky_Linux_9_Install_Docker.sh
+# github:
+# wget https://raw.githubusercontent.com/funet8/Rocky-Linux-Shell/refs/heads/main/shell/Rocky_Linux_9_Install_Docker.sh
+# sh Rocky_Linux_9_Install_Docker.sh
+```
+
+
 
 
 
