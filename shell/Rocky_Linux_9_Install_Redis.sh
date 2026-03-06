@@ -77,7 +77,7 @@ port ${redis_port}
 # 所以你要修改这两个值才能达到你的预期。
 tcp-backlog 511
 # 指定在一个 client 空闲多少秒之后关闭连接（0 就是不管它）
-timeout 20
+timeout 10
 # tcp 心跳包。
 # 如果设置为非零，则在与客户端缺乏通讯的时候使用 SO_KEEPALIVE 发送 tcp acks 给客户端。
 # 这个之所有有用，主要由两个原因：
@@ -105,9 +105,10 @@ logfile "${redis_dir}/redis_${redis_port}.log"
 databases 16
 #保存数据到磁盘。格式是：save <seconds> <changes> ，含义是在 seconds 秒之后至少有 changes个keys 发生改变则保存一次。
 #默认设置意思是：在60 秒之内有10000 个keys 发生变化时、在300 秒之内有10 个keys 发生了变化、在900 秒之内有1 个keys 发生了变化，则镜像备份。
-save 900 1
-save 300 10
-save 60 10000
+#save 900 1
+#save 300 10
+#save 60 10000
+save 3600 100
 #默认情况下，如果 redis 最后一次的后台保存失败，redis 将停止接受写操作，这样以一种强硬的方式让用户知道数据不能正确的持久化到磁盘， 否则就会没人注意到灾难的发生。 如果后台保存进程重新启动工作了，redis 也将自动的允许写操作。然而你要是安装了靠谱的监控，你可能不希望 redis 这样做，那你就改成 no 好了。
 stop-writes-on-bgsave-error yes
 #是否在dump  .rdb数据库的时候压缩字符串，默认设置为yes。如果你想节约一些cpu资源的话，可以把它设置为no，这样的话数据集就可能会比较大。
@@ -179,7 +180,8 @@ aof-rewrite-incremental-fsync yes
 #最大内存设置，默认为0,表示"无限制",推荐为物理内存的3/4,此配置需要和"maxmemory-policy"配合使用,当redis中内存数据达到maxmemory时,触发"清除策略"
 maxmemory ${redis_size}
 #内存不足"时,数据清除策略,默认为"volatile-lru"。
-maxmemory-policy volatile-lru
+# 改为 allkeys-lru，内存不足时优先回收所有键中最少使用的，更高效释放内存
+maxmemory-policy allkeys-lru
 #限制同时连接的客户端数量，不易过大具体多少根据具体情况而定
 maxclients 30000
 EOFI
